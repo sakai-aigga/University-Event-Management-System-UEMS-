@@ -1,1 +1,1 @@
-# University-Event-Management-System-UEMS-
+# University Event Management System (UEMS)
