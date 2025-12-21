@@ -25,7 +25,56 @@ $conn->close();
     <link rel="stylesheet" href="../assets/css/styles.css">
 </head>
 <body>
+    <style>
+.profile-card {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 40px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
 
+.profile-info h2 {
+    margin-bottom: 20px;
+    color: #4a00e0;
+    font-size: 1.8rem;
+}
+
+.profile-row {
+    display: flex;
+    margin-bottom: 15px;
+    gap: 10px;
+}
+
+.profile-label {
+    font-weight: 600;
+    width: 120px;
+    color: #555;
+}
+
+.profile-value {
+    color: #333;
+    flex: 1;
+}
+
+.btn-logout {
+    background: var(--pink-accent);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 30px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: 0.3s;
+}
+
+.btn-logout:hover {
+    filter: brightness(1.1);
+}
+</style>
 <header>
     <div class="logo-area">
         <img src="../assets/images/UEMS_logo.png" class="header-logo" alt="KUEMS">
