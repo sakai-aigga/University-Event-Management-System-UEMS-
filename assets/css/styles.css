@@ -179,3 +179,31 @@ header {
         padding: 25px 20px;
     }
 }
+
+/* Home Page Styles */
+
+.home-actions {
+    text-align: center;
+}
+
+.home-actions a {
+    display: block;
+    text-decoration: none;
+}
+
+.home-btn-login  {
+    width: 100%;
+    background-color: var(--pink-accent);
+    color: rgb(178, 56, 56);
+    border: none;
+    padding: 14px;
+    border-radius: 30px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+    background-color: #4a00e0;
+}
+.home-btn-login:hover {
+    filter: brightness(1.1);
+}
+

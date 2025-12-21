@@ -68,18 +68,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             <form method="POST" action="../api/login/index.php">
 
                 <div class="form-group">
-                    <label>Email address *</label>
+                    <label>Email address</label>
                     <input type="email" name="email" placeholder="Enter email" required>
                 </div>
 
                 <div class="form-group">
-                    <label>Password *</label>
+                    <label>Password</label>
                     <input type="password" name="password" placeholder="Enter password" required>
-                </div>
-
-                <div class="form-group">
-                    <label>Confirm Password *</label>
-                    <input type="password" name="confirm_password" placeholder="Confirm password" required>
                 </div>
 
                 <button type="submit" class="btn-login">Login Account</button>
