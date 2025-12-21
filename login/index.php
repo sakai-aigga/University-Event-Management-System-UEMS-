@@ -1,35 +1,9 @@
 <?php
-include "../includes/db-config.php";
 session_start();
-
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $email            = $_POST['email'];
-    $password         = $_POST['password'];
-    $confirm_password = $_POST['confirm_password'];
-
-    // Check if passwords match
-    if ($password !== $confirm_password) {
-        echo "Passwords do not match!";
-        exit;
-    }
-
-    $stmt = $conn->prepare(
-        "SELECT u_id, name, password, role FROM user WHERE email = ?"
-    );
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $stmt->bind_result($u_id, $name, $hashedPassword, $role);
-    $stmt->fetch();
-
-    if ($u_id && password_verify($password, $hashedPassword)) {
-        $_SESSION['u_id'] = $u_id;
-        $_SESSION['role'] = $role;
-        echo "Login successful";
-    } else {
-        echo "Invalid credentials";
-    }
-
-    $stmt->close();
+// Optional: Redirect if already logged in
+if (isset($_SESSION['u_id'])) {
+    header("Location: ../profile/");
+    exit;
 }
 ?>
 
@@ -65,24 +39,24 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         </div>
 
         <div class="login-form-container">
-            <form method="POST" action="../api/login/index.php">
-
+            <form id="loginForm">
                 <div class="form-group">
                     <label>Email address</label>
                     <input type="email" name="email" placeholder="Enter email" required>
                 </div>
-
                 <div class="form-group">
                     <label>Password</label>
                     <input type="password" name="password" placeholder="Enter password" required>
                 </div>
-
                 <button type="submit" class="btn-login">Login Account</button>
             </form>
-        </div>
+
+            <!-- Add a place to show errors -->
+            <div id="errorMessage" style="color: red; margin-top: 10px;"></div>
+                    </div>
 
     </div>
 </section>
-
+<script src="../assets/js/script.js"></script>
 </body>
 </html>
