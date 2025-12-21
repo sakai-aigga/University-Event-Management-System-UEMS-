@@ -1,31 +1,8 @@
 <?php
-include "../includes/db-config.php";
 session_start();
-
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $name             = $_POST['name'];
-    $email            = $_POST['email'];
-    $contact          = $_POST['contact'];
-    $role             = $_POST['role'];
-    $password         = $_POST['password'];
-    $confirm_password = $_POST['confirm_password'];
-
-    // Check if passwords match
-    if ($password !== $confirm_password) {
-        echo "Passwords do not match!";
-        exit;
-    }
-
-    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-
-    $stmt = $conn->prepare(
-        "INSERT INTO user (name, email, password, contact, role) VALUES (?, ?, ?, ?, ?)"
-    );
-    $stmt->bind_param("sssss", $name, $email, $hashedPassword, $contact, $role);
-    $stmt->execute();
-
-    echo "Registration successful";
-    $stmt->close();
+if (isset($_SESSION['u_id'])) {
+    header("Location: ../profile/");
+    exit;
 }
 ?>
 
@@ -59,8 +36,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         </div>
 
         <div class="login-form-container">
-            <form method="POST" action="../api/register/index.php">
-
+            <form id="registerForm">
                 <div class="form-group">
                     <label>Full Name</label>
                     <input type="text" name="name" placeholder="Enter full name" required>
@@ -77,15 +53,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 </div>
 
                 <div class="form-group">
-                    <label>Role</label>
-                    <select name="role" required>
-                        <option value="">Select Role</option>
-                        <option value="student">Student</option>
-                        <option value="teacher">Teacher</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
                     <label>Password</label>
                     <input type="password" name="password" placeholder="Enter password" required>
                 </div>
@@ -96,11 +63,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 </div>
 
                 <button type="submit" class="btn-login">Register Account</button>
+                <div id="errorMessage" style="color: red; margin-top: 10px;"></div>
             </form>
         </div>
 
     </div>
 </section>
-
+<script src="../assets/js/script.js"></script>
 </body>
 </html>
