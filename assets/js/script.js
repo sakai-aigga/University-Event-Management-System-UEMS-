@@ -18,29 +18,40 @@ document.getElementById('loginForm')?.addEventListener('submit', async function(
 });
 
 // Handle register form submission
-document.getElementById('registerForm')?.addEventListener('submit', async function(e) {
-    e.preventDefault();
+document.getElementById('registerForm').addEventListener('submit', async function(e) {
+    e.preventDefault(); // Prevent normal form submit
 
+    // Clear previous errors
+    document.getElementById('errorMessage').textContent = '';
+
+    // Collect form data
     const formData = new FormData(this);
-    const response = await fetch('../api/register/index.php', {
-        method: 'POST',
-        body: formData
-    });
 
-    const result = await response.json();
+    try {
+        const response = await fetch('../api/register/index.php', {
+            method: 'POST',
+            body: formData
+        });
 
-    if (result.success) {
-        alert(result.message); // e.g., "Registration successful"
-        window.location.href = '../login/'; // Go to login after register
-    } else {
-        document.getElementById('errorMessage').textContent = result.message;
+        const result = await response.json();
+
+        if (result.success) {
+            alert(result.message); // Optional: show success message
+            window.location.href = '../login/'; // Redirect to login
+        } else {
+            document.getElementById('errorMessage').textContent = result.message;
+        }
+    } catch (error) {
+        document.getElementById('errorMessage').textContent = 'Network error. Please try again.';
     }
 });
 
 // Password visibility toggle for register page
-document.getElementById('togglePassword').addEventListener('click', function () {
-    const passwordInput = this.previousElementSibling;
-    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-    passwordInput.setAttribute('type', type);
-    this.textContent = type === 'password' ? 'Show' : 'Hide';
+document.querySelectorAll('.togglePassword').forEach(el => {
+    el.addEventListener('click', () => {
+        const input = el.previousElementSibling;
+        const type = input.type === 'password' ? 'text' : 'password';
+        input.type = type;
+        el.textContent = type === 'password' ? 'Show' : 'Hide';
+    });
 });
