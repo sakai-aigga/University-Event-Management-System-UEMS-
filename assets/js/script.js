@@ -36,3 +36,11 @@ document.getElementById('registerForm')?.addEventListener('submit', async functi
         document.getElementById('errorMessage').textContent = result.message;
     }
 });
+
+// Password visibility toggle for register page
+document.getElementById('togglePassword').addEventListener('click', function () {
+    const passwordInput = this.previousElementSibling;
+    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+    passwordInput.setAttribute('type', type);
+    this.textContent = type === 'password' ? 'Show' : 'Hide';
+});

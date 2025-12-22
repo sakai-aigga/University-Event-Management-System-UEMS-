@@ -26,7 +26,7 @@ if (empty($email) || empty($password)) {
 }
 
 $stmt = $conn->prepare(
-    "SELECT u_id, name, password FROM user WHERE email = ? LIMIT 1"
+    "SELECT u_id, name, password FROM users WHERE email = ? LIMIT 1"
 );
 $stmt->bind_param("s", $email);
 $stmt->execute();
@@ -41,7 +41,7 @@ if ($u_id && password_verify($password, $hashedPassword)) {
     echo json_encode([
         "success" => true,
         "message" => "Login successful",
-        "user" => [
+        "users" => [
             "u_id"  => $u_id,
             "name"  => $name,
             "email" => $email,

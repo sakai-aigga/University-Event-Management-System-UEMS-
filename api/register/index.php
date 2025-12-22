@@ -40,7 +40,7 @@ if ($password !== $confirm) {
 
 // Check if email exists
 $check = $conn->prepare(
-    "SELECT u_id FROM user WHERE email = ? LIMIT 1"
+    "SELECT u_id FROM users WHERE email = ? LIMIT 1"
 );
 $check->bind_param("s", $email);
 $check->execute();
@@ -60,7 +60,7 @@ $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
 // Insert user
 $stmt = $conn->prepare(
-    "INSERT INTO user (name, email, password, contact)
+    "INSERT INTO users (name, email, password, contact)
      VALUES (?, ?, ?, ?)"
 );
 $stmt->bind_param(
