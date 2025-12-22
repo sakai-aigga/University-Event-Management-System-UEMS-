@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KUEMS - Register Individual Account</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #8e2de2, #4a00e0);
+            --pink-accent: #ff007a;
+            --dark-blue: #05014a;
+            --light-bg: #f8f9fa;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            overflow-x: hidden;
+        }
+
+        /* --- Header --- */
+        header {
+            background: linear-gradient(to right, #7e22ce, #3b0764);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 8%;
+            color: white;
+        }
+
+        .logo-area { display: flex; align-items: center; gap: 10px; }
+        .logo-text { font-size: 24px; font-weight: 600; letter-spacing: 1px; }
+        .header-logo { height: 40px; width: auto; object-fit: contain; }
+
+        nav { display: flex; align-items: center; gap: 30px; }
+        nav a { color: white; text-decoration: none; font-size: 14px; opacity: 0.9; }
+        .btn-login-nav {
+            border: 1.5px solid white;
+            padding: 6px 25px;
+            border-radius: 20px;
+            transition: 0.3s;
+        }
+        .btn-login-nav:hover { background: white; color: #3b0764; }
+
+        /* --- Main Hero / Register Area --- */
+        .hero-section {
+            padding: 60px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: calc(100vh - 70px);
+        }
+
+        .register-card {
+            width: 100%;
+            max-width: 1100px;
+            background: var(--primary-gradient), 
+                        url('https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=2070&auto=format&fit=crop') center/cover;
+            background-blend-mode: multiply;
+            border-radius: 25px;
+            display: flex;
+            flex-wrap: wrap;
+            padding: 60px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        .register-info {
+            flex: 1 1 450px;
+            color: white;
+            padding-right: 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .register-info h2 { font-size: 36px; margin-bottom: 15px; font-weight: 600; }
+        .register-info p { font-size: 16px; opacity: 0.85; line-height: 1.6; margin-bottom: 40px; }
+        
+        .login-link-alt { margin-top: auto; font-size: 15px; }
+        .login-link-alt a { color: #00d2ff; text-decoration: none; font-weight: 600; }
+
+        /* --- Form Styling --- */
+        .form-outer-box {
+            flex: 1 1 400px;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(15px);
+            padding: 40px;
+            border-radius: 25px;
+            border: 4px solid var(--pink-accent); /* Pink border from image */
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; font-size: 13px; font-weight: 600; color: #555; margin-bottom: 8px; }
+        
+        .input-wrapper input {
+            width: 100%;
+            padding: 14px 20px;
+            border-radius: 12px;
+            border: 1.5px solid #d1d5db;
+            background: #fff;
+            font-size: 14px;
+            outline-color: var(--pink-accent);
+        }
+
+        .pass-container { position: relative; }
+        .show-toggle {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+        }
+
+        /* Terms and Toggle Row */
+        .terms-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+            font-size: 13px;
+            color: #555;
+        }
+        .terms-check { display: flex; align-items: center; gap: 8px; }
+
+        /* Custom Toggle Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 22px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px; width: 16px;
+            left: 3px; bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--pink-accent); }
+        input:checked + .slider:before { transform: translateX(18px); }
+
+        .btn-register {
+            width: 100%;
+            background-color: var(--pink-accent);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn-register:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        .divider {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 12px;
+            color: #aaa;
+            position: relative;
+        }
+        .divider::before, .divider::after {
+            content: ""; position: absolute; top: 50%; width: 45%; height: 1px; background: #ddd;
+        }
+        .divider::before { left: 0; } .divider::after { right: 0; }
+
+        .btn-google {
+            width: 100%;
+            background: white;
+            border: 1px solid #ddd;
+            padding: 12px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        /* --- Footer --- */
+        footer {
+            background-color: var(--dark-blue);
+            color: white;
+            padding: 60px 8%;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 2fr;
+            gap: 50px;
+        }
+
+        .footer-logo h2 { margin-bottom: 20px; }
+        .footer-logo p { font-size: 13px; opacity: 0.7; line-height: 1.8; }
+        .footer-links ul { list-style: none; }
+        .footer-links li { margin-bottom: 12px; font-size: 14px; opacity: 0.8; }
+
+        .newsletter-box {
+            display: flex;
+            background: white;
+            padding: 5px;
+            border-radius: 30px;
+            margin-top: 15px;
+        }
+        .newsletter-box input {
+            border: none; padding: 10px 20px; flex: 1; border-radius: 30px; outline: none;
+        }
+        .btn-subscribe {
+            background-color: var(--pink-accent);
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        /* --- MEDIA QUERIES --- */
+        @media (max-width: 992px) {
+            .register-card { padding: 40px; }
+            .register-info { padding-right: 0; margin-bottom: 40px; text-align: center; }
+            .footer-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            header { padding: 15px 5%; flex-direction: column; gap: 15px; }
+            nav { gap: 15px; font-size: 12px; }
+            .footer-grid { grid-template-columns: 1fr; text-align: center; }
+            .newsletter-box { flex-direction: column; background: transparent; gap: 10px; }
+            .newsletter-box input { border-radius: 12px; }
+            .btn-subscribe { border-radius: 12px; }
+        }
+
+        @media (max-width: 480px) {
+            .register-card { padding: 30px 15px; }
+            .register-info h2 { font-size: 28px; }
+            .form-outer-box { padding: 25px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-area">
+            <img src="cllg.png" alt="KUEMS" class="header-logo">
+            <span class="logo-text">KUEMS</span>
+        </div>
+        <nav>
+            <a href="#">Events</a>
+            <a href="#">About</a>
+            <a href="#">Blog</a>
+            <a href="#">Contact</a>
+            <a href="#" class="btn-login-nav">Login</a>
+        </nav>
+    </header>
+
+    <section class="hero-section">
+        <div class="register-card">
+            <div class="register-info">
+                <h2>Register Individual Account!</h2>
+                <p>For the purpose of industry regulation, your details are required.</p>
+                
+                <div class="login-link-alt">
+                    Already have an Account? <a href="#">Click Here to Login</a>
+                </div>
+            </div>
+
+            <div class="form-outer-box">
+                <form>
+                    <div class="form-group">
+                        <label>fullname*</label>
+                        <div class="input-wrapper">
+                            <input type="text" placeholder="Enter name here" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Email address*</label>
+                        <div class="input-wrapper">
+                            <input type="email" placeholder="Enter email address" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Create password*</label>
+                        <div class="input-wrapper pass-container">
+                            <input type="password" placeholder="Enter your password" required>
+                            <span class="show-toggle">Show</span>
+                        </div>
+                    </div>
+
+                    <div class="terms-row">
+                        <div class="terms-check">
+                            <input type="checkbox" id="terms" required>
+                            <label for="terms">I agree to terms & conditions</label>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn-register">Register Account</button>
+                    
+                    <div class="divider">Or</div>
+
+                    <button type="button" class="btn-google">
+                        <img src="google.png" width="18" alt="Google">
+                        Register with Google
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-logo">
+                <h2>KUEMS</h2>
+                <p>Eventick is a global self-service ticketing platform for live experiences that allows anyone to create, share, find and attend events that fuel their passions.</p>
+            </div>
+           <div>
+                <h4>Location</h4>
+                <ul style="list-style:none; margin-top: 15px; font-size: 14px; opacity: 0.8; line-height: 2;">
+                    <li>Hattiban, Lalitpur, Nepal</li>
+                    <li>KUSOED</li>
+                </ul>
+            </div>
+            <div>
+                <h4>Contact</h4>
+                <ul style="list-style:none; margin-top: 15px; font-size: 14px; opacity: 0.8; line-height: 2;">
+                    <li>15314105, 15912524</li>
+                    <li>admin@kusoed.edu.np</li>
+                </ul>
+            </div>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
