@@ -1,0 +1,219 @@
+      /* --- HOME PAGE ONLY STYLES (minimal additions) --- */
+
+/* Reuse existing vars */
+:root {
+    --primary-purple: #7e22ce;
+    --dark-purple: #3b0764;
+    --pink-accent: #ff007a;
+    --text-dark: #1f2937;
+    --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+body {
+    background-color: white;
+    color: var(--text-dark);
+}
+
+/* Header update */
+header {
+    background: linear-gradient(to right, var(--primary-purple), var(--dark-purple));
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.btn-login {
+    border: 1px solid white;
+    padding: 5px 20px;
+    border-radius: 20px;
+    color: white;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+/* Search */
+.search-container {
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    width: 100%;
+    max-width: 1000px;
+    box-shadow: var(--card-shadow);
+    margin-top: 30px;
+}
+.search-item {
+    flex: 1 1 200px;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+.search-item label {
+    color: #666;
+    font-size: 12px;
+    font-weight: 600;
+}
+.search-item select, .search-item input {
+    border: none;
+    padding: 8px 0;
+    border-bottom: 1px solid #ddd;
+    outline: none;
+}
+
+/* Categories */
+.categories {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    padding: 40px 5%;
+    flex-wrap: wrap;
+    background: #fff;
+}
+.cat-item {
+    text-align: center;
+    cursor: pointer;
+}
+.cat-icon {
+    width: 60px;
+    height: 60px;
+    background: #f0f0f0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+    font-size: 24px;
+    transition: 0.3s;
+}
+.cat-item:hover .cat-icon {
+    background: var(--pink-accent);
+    color: white;
+}
+
+/* Sections */
+main section {
+    padding: 60px 8%;
+}
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+}
+.section-header h2 {
+    font-size: 28px;
+    border-left: 5px solid var(--pink-accent);
+    padding-left: 15px;
+}
+
+/* Events Grid */
+.events-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+}
+.event-card {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+    transition: 0.3s;
+    position: relative;
+}
+.event-card:hover {
+    transform: translateY(-10px);
+}
+.event-img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+.event-content {
+    padding: 20px;
+}
+.date-tag {
+    color: var(--pink-accent);
+    font-weight: 600;
+    font-size: 14px;
+}
+.event-title {
+    font-weight: 600;
+    margin: 10px 0;
+    font-size: 18px;
+}
+.event-location {
+    font-size: 13px;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.free-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: var(--pink-accent);
+    color: white;
+    padding: 5px 15px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* CTA */
+.cta-banner {
+    background: #f3e8ff;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 40px;
+    margin: 40px 0;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+.cta-content h3 {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+.btn-pink {
+    background: var(--pink-accent);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.newsletter-input {
+    background: white;
+    border-radius: 30px;
+    padding: 5px 5px 5px 20px;
+    display: flex;
+    align-items: center;
+    margin-top: 20px;
+}
+.newsletter-input input {
+    border: none;
+    outline: none;
+    flex: 1;
+    padding: 10px;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    .section-header { flex-direction: column; align-items: flex-start; gap: 15px; }
+}
+@media (max-width: 768px) {
+    header { flex-direction: column; gap: 15px; }
+    nav { font-size: 12px; gap: 10px; }
+    .search-container { flex-direction: column; }
+    .cta-banner { text-align: center; }
+    .events-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 480px) {
+    main section { padding: 40px 5%; }
+}
