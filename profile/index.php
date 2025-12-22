@@ -6,7 +6,7 @@ if (!isset($_SESSION['u_id'])) {
 }
 
 include "../includes/db-config.php";
-$stmt = $conn->prepare("SELECT name, email, contact FROM user WHERE u_id = ?");
+$stmt = $conn->prepare("SELECT name, email, contact FROM users WHERE u_id = ?");
 $stmt->bind_param("i", $_SESSION['u_id']);
 $stmt->execute();
 $stmt->bind_result($name, $email, $contact);
@@ -77,9 +77,18 @@ $conn->close();
 </style>
 <header>
     <div class="logo-area">
-        <img src="../assets/images/UEMS_logo.png" class="header-logo" alt="KUEMS">
-        <span class="logo-text">KUEMS</span>
+        <a href="../index.php" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: white;">
+            <img src="../assets/images/UEMS_logo.png" class="header-logo" alt="KUEMS">
+            <span class="logo-text">KUEMS</span>
+        </a>
     </div>
+    <nav>
+            <a href="#">Events</a>
+            <a href="#">About</a>
+            <a href="#">Blog</a>
+            <a href="#">Registration</a>
+            <a href="#">Contact</a>
+    </nav>
 </header>
 
 <div class="profile-card">
