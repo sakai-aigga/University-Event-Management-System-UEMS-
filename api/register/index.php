@@ -13,7 +13,7 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     exit;
 }
 
-$name     = $_POST['name'] ?? '';
+$name     = $_POST['full_name'] ?? '';
 $email    = $_POST['email'] ?? '';
 $contact  = $_POST['contact'] ?? '';
 $password = $_POST['password'] ?? '';
