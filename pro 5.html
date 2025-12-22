@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KUEMS - Home | Discover Events</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-purple: #7e22ce;
+            --dark-purple: #3b0764;
+            --pink-accent: #ff007a;
+            --bg-light: #f3f4f6;
+            --text-dark: #1f2937;
+            --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background-color: white; color: var(--text-dark); overflow-x: hidden; }
+
+        /* --- Header --- */
+        header {
+            background: linear-gradient(to right, var(--primary-purple), var(--dark-purple));
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 5%; color: white; position: sticky; top: 0; z-index: 1000;
+        }
+        .logo { font-size: 24px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+        .logo img { height: 35px; }
+        nav { display: flex; gap: 20px; align-items: center; }
+        nav a { color: white; text-decoration: none; font-size: 14px; }
+        .btn-login { border: 1px solid white; padding: 5px 20px; border-radius: 20px; }
+
+        /* --- Hero Section --- */
+        .hero {
+            background: linear-gradient(rgba(60, 7, 100, 0.8), rgba(60, 7, 100, 0.8)), url('https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80&w=2000');
+            background-size: cover; background-position: center;
+            padding: 80px 5%; color: white; display: flex; flex-direction: column; align-items: center; text-align: center;
+        }
+        .hero h1 { font-size: 2.5rem; margin-bottom: 20px; max-width: 800px; }
+        
+        /* Search Bar */
+        .search-container {
+            background: white; padding: 20px; border-radius: 15px; display: flex; flex-wrap: wrap;
+            gap: 15px; width: 100%; max-width: 1000px; box-shadow: var(--card-shadow); margin-top: 30px;
+        }
+        .search-item { flex: 1 1 200px; display: flex; flex-direction: column; text-align: left; }
+        .search-item label { color: #666; font-size: 12px; font-weight: 600; }
+        .search-item select, .search-item input { border: none; padding: 8px 0; border-bottom: 1px solid #ddd; outline: none; }
+
+        /* --- Category Icons --- */
+        .categories { display: flex; justify-content: center; gap: 30px; padding: 40px 5%; flex-wrap: wrap; background: #fff; }
+        .cat-item { text-align: center; cursor: pointer; }
+        .cat-icon { width: 60px; height: 60px; background: #f0f0f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; font-size: 24px; transition: 0.3s; }
+        .cat-item:hover .cat-icon { background: var(--pink-accent); color: white; }
+
+        /* --- Section Styling --- */
+        section { padding: 60px 8%; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+        .section-header h2 { font-size: 28px; border-left: 5px solid var(--pink-accent); padding-left: 15px; }
+
+        /* --- Events Grid --- */
+        .events-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
+            gap: 30px; 
+        }
+        .event-card { 
+            background: white; border-radius: 15px; overflow: hidden; 
+            box-shadow: var(--card-shadow); transition: 0.3s; position: relative;
+        }
+        .event-card:hover { transform: translateY(-10px); }
+        .event-img { width: 100%; height: 200px; object-fit: cover; }
+        .event-content { padding: 20px; }
+        .date-tag { color: var(--pink-accent); font-weight: 600; font-size: 14px; }
+        .event-title { font-weight: 600; margin: 10px 0; font-size: 18px; }
+        .event-location { font-size: 13px; color: #666; display: flex; align-items: center; gap: 5px; }
+        .free-badge { position: absolute; top: 15px; right: 15px; background: var(--pink-accent); color: white; padding: 5px 15px; border-radius: 5px; font-size: 12px; font-weight: 600; }
+
+        /* --- CTA Section --- */
+        .cta-banner {
+            background: #f3e8ff; border-radius: 20px; display: flex; align-items: center;
+            justify-content: space-around; padding: 40px; margin: 40px 0; flex-wrap: wrap; gap: 20px;
+        }
+        .cta-content h3 { font-size: 24px; margin-bottom: 10px; }
+        .btn-pink { background: var(--pink-accent); color: white; border: none; padding: 12px 30px; border-radius: 10px; font-weight: 600; cursor: pointer; }
+
+        /* --- Footer --- */
+        footer { background: #05014a; color: white; padding: 60px 8% 20px; }
+        .footer-top { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; margin-bottom: 40px; }
+        .newsletter-input { background: white; border-radius: 30px; padding: 5px 5px 5px 20px; display: flex; align-items: center; margin-top: 20px; }
+        .newsletter-input input { border: none; outline: none; flex: 1; padding: 10px; }
+
+        /* --- Media Queries --- */
+        @media (max-width: 992px) {
+            .hero h1 { font-size: 2rem; }
+            .section-header { flex-direction: column; align-items: flex-start; gap: 15px; }
+        }
+
+        @media (max-width: 768px) {
+            header { flex-direction: column; gap: 15px; }
+            nav { font-size: 12px; gap: 10px; }
+            .search-container { flex-direction: column; }
+            .cta-banner { text-align: center; }
+            .cta-banner img { max-width: 200px; }
+        }
+
+        @media (max-width: 480px) {
+            .events-grid { grid-template-columns: 1fr; }
+            section { padding: 40px 5%; }
+            .hero h1 { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <img src="cllg.png" alt="Logo"> KUEMS
+        </div>
+        <nav>
+            <a href="#">Events</a>
+            <a href="#">About</a>
+            <a href="#">Blog</a>
+            <a href="#">Contact</a>
+            <a href="#" class="btn-login">Login</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <h1>Find Your Next Experience at UNI Events</h1>
+            <div class="search-container">
+                <div class="search-item">
+                    <label>Date</label>
+                    <select><option>Select Event Month</option></select>
+                </div>
+                <div class="search-item">
+                    <label>University</label>
+                    <select><option>Select University</option></select>
+                </div>
+                <div class="search-item">
+                    <label>Event Type</label>
+                    <select><option>Find Event</option></select>
+                </div>
+            </div>
+        </section>
+
+        <div class="categories">
+            <div class="cat-item"><div class="cat-icon">🎓</div><p>Education</p></div>
+            <div class="cat-item"><div class="cat-icon">🤝</div><p>Convocation</p></div>
+            <div class="cat-item"><div class="cat-icon">🎨</div><p>Sport's</p></div>
+            <div class="cat-item"><div class="cat-icon">🎸</div><p>Other</p></div>
+        </div>
+
+        <section>
+            <div class="section-header">
+                <h2>Upcoming Events</h2>
+                <div class="filters">
+                    <select style="padding: 5px 10px; border-radius: 5px; border: 1px solid #ddd;">
+                        <option>Weekdays</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="events-grid">
+                <div class="event-card">
+                    <span class="free-badge">FREE</span>
+                    <img src="https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&q=80&w=500" class="event-img">
+                    <div class="event-content">
+                        <p class="date-tag">NOV 11</p>
+                        <h3 class="event-title">Civil Festum</h3>
+                        <p class="event-location">📍 University Auditorium</p>
+                    </div>
+                </div>
+                <div class="event-card">
+                    <span class="free-badge">FREE</span>
+                    <img src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&q=80&w=500" class="event-img">
+                    <div class="event-content">
+                        <p class="date-tag">NOV 14</p>
+                        <h3 class="event-title">Yoga Festum</h3>
+                        <p class="event-location">📍 Campus Ground</p>
+                    </div>
+                </div>
+                <div class="event-card">
+                    <img src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=500" class="event-img">
+                    <div class="event-content">
+                        <p class="date-tag">NOV 25</p>
+                        <h3 class="event-title">Night of Melodies</h3>
+                        <p class="event-location">📍 Main Stage</p>
+                    </div>
+                </div>
+            </div>
+            <div style="text-align:center; margin-top:40px;">
+                <button style="background:none; border: 2px solid var(--primary-purple); color: var(--primary-purple); padding: 10px 40px; border-radius: 10px; font-weight: 600; cursor: pointer;">See All Events</button>
+            </div>
+        </section>
+
+        <section>
+            <div class="cta-banner">
+                <img src="https://cdn-icons-png.flaticon.com/512/4341/4341134.png" width="150" alt="CTA">
+                <div class="cta-content">
+                    <h3>Add Your Loving Event</h3>
+                    <p>Register your event and reach thousands of students.</p>
+                </div>
+                <button class="btn-pink">Host An Event</button>
+            </div>
+        </section>
+
+        <section style="background: #fafafa;">
+            <div class="section-header">
+                <h2>Past Successful Events</h2>
+            </div>
+            <div class="events-grid">
+                <div class="event-card">
+                    <img src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80&w=500" class="event-img">
+                    <div class="event-content">
+                        <h3 class="event-title">Conference Keynote</h3>
+                        <p style="font-size: 14px; color: #777;">Successful 2024 edition with over 500+ attendees.</p>
+                    </div>
+                </div>
+                <div class="event-card">
+                    <img src="https://images.unsplash.com/photo-1540575861501-7c00117fc3f3?auto=format&fit=crop&q=80&w=500" class="event-img">
+                    <div class="event-content">
+                        <h3 class="event-title">Digital Marketing Workshop</h3>
+                        <p style="font-size: 14px; color: #777;">Industry experts sharing insights on growth.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-top">
+            <div>
+                <h2>KUEMS</h2>
+                <p style="font-size: 13px; opacity: 0.7; margin-top: 15px;">A dedicated event management system for university students to find and host incredible experiences.</p>
+            </div>
+            <div>
+                <h4>Location</h4>
+                <ul style="list-style:none; margin-top: 15px; font-size: 14px; opacity: 0.8; line-height: 2;">
+                    <li>Hattiban, Lalitpur, Nepal</li>
+                    <li>KUSOED</li>
+                </ul>
+            </div>
+            <div>
+                <h4>Contact</h4>
+                <ul style="list-style:none; margin-top: 15px; font-size: 14px; opacity: 0.8; line-height: 2;">
+                    <li>15314105, 15912524</li>
+                    <li>admin@kusoed.edu.np</li>
+                </ul>
+            </div>
+        </div>
+        <p style="text-align:center; font-size: 12px; opacity: 0.5; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">© 2025 KUEMS. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>
