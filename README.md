@@ -11,13 +11,12 @@ UEMS is a simple event management application built with PHP, JavaScript, CSS an
 - Profile management
 - Simple UI for event handling
 
-_(Add more features here if your project does more.)_
 
 ## 🧩 Technologies Used
 
 - **Backend:** PHP  
 - **Frontend:** HTML, CSS, JavaScript  
-- **Data Storage:** (If you used a database, list it — e.g., MySQL, SQLite)  
+- **Data Storage:** MySQL
 - **Assets & Includes:** CSS, images, reusable components
 
 ## 🗂️ Project Structure
@@ -39,7 +38,7 @@ _(Add more features here if your project does more.)_
    git clone https://github.com/sakai-aigga/University-Event-Management-System-UEMS-.git
 2. Move into project folder:
    ```bash
-  cd University-Event-Management-System-UEMS-
+   cd University-Event-Management-System-UEMS-
 3. If using a database (MySQL):
   - Create a database
   - Import your SQL file
