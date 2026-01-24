@@ -1,40 +1,5 @@
 <?php
-<<<<<<< HEAD
-include "../includes/db-config.php";
 session_start();
-
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $email            = $_POST['email'];
-    $password         = $_POST['password'];
-    $confirm_password = $_POST['confirm_password'];
-
-    // Check if passwords match
-    if ($password !== $confirm_password) {
-        echo "Passwords do not match!";
-        exit;
-    }
-
-    $stmt = $conn->prepare(
-        "SELECT u_id, name, password, role FROM user WHERE email = ?"
-    );
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $stmt->bind_result($u_id, $name, $hashedPassword, $role);
-    $stmt->fetch();
-
-    if ($u_id && password_verify($password, $hashedPassword)) {
-        $_SESSION['u_id'] = $u_id;
-        $_SESSION['role'] = $role;
-        echo "Login successful";
-    } else {
-        echo "Invalid credentials";
-    }
-
-    $stmt->close();
-}
-=======
-session_start();
->>>>>>> d0c69e3dc617b67a68153a9ab340951899fd1b0b
 ?>
 
 <!DOCTYPE html>
@@ -52,11 +17,6 @@ session_start();
 
 <header>
     <div class="logo-area">
-<<<<<<< HEAD
-        <img src="cllg.png" class="header-logo" alt="KUEMS">
-        <span class="logo-text">KUEMS</span>
-    </div>
-=======
         <a href="../index.php" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: white;">
             <img src="../assets/images/UEMS_logo.png" class="header-logo" alt="KUEMS">
             <span class="logo-text">KUEMS</span>
@@ -70,18 +30,13 @@ session_start();
             <a href="#">Contact</a>
             
     </nav>
->>>>>>> d0c69e3dc617b67a68153a9ab340951899fd1b0b
 </header>
 
 <section class="hero-section">
     <div class="login-card">
 
         <div class="login-info">
-<<<<<<< HEAD
-            <h2>Login Your Account</h2>
-=======
             <h2>Login to Your Account</h2>
->>>>>>> d0c69e3dc617b67a68153a9ab340951899fd1b0b
             <p>Your credentials are required to continue.</p>
             <div class="register-link">
                 Don't have an account? <a href="../register/">Register</a>
@@ -89,32 +44,6 @@ session_start();
         </div>
 
         <div class="login-form-container">
-<<<<<<< HEAD
-            <form method="POST" action="../api/login/index.php">
-
-                <div class="form-group">
-                    <label>Email address *</label>
-                    <input type="email" name="email" placeholder="Enter email" required>
-                </div>
-
-                <div class="form-group">
-                    <label>Password *</label>
-                    <input type="password" name="password" placeholder="Enter password" required>
-                </div>
-
-                <div class="form-group">
-                    <label>Confirm Password *</label>
-                    <input type="password" name="confirm_password" placeholder="Confirm password" required>
-                </div>
-
-                <button type="submit" class="btn-login">Login Account</button>
-            </form>
-        </div>
-
-    </div>
-</section>
-
-=======
             <form id="loginForm">
                 <div class="form-group">
                     <label>Email address</label>
@@ -159,6 +88,5 @@ KUSOED</li>
         © 2025 KUEMS. All rights reserved.
     </p>
 </footer>
->>>>>>> d0c69e3dc617b67a68153a9ab340951899fd1b0b
 </body>
 </html>
