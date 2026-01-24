@@ -4,9 +4,13 @@ session_start();
 
 header("Content-Type: application/json");
 
+<<<<<<< HEAD
+if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+=======
 // Allow only POST
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     http_response_code(405);
+>>>>>>> d0c69e3dc617b67a68153a9ab340951899fd1b0b
     echo json_encode([
         "success" => false,
         "message" => "Only POST method allowed"
@@ -14,6 +18,21 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     exit;
 }
 
+<<<<<<< HEAD
+$username = $_POST['username'] ?? '';
+$password = $_POST['password'] ?? '';
+
+$stmt = $conn->prepare(
+    "SELECT password FROM users WHERE username = ?"
+);
+$stmt->bind_param("s", $username);
+$stmt->execute();
+$stmt->bind_result($hashedPassword);
+$stmt->fetch();
+
+if ($hashedPassword && password_verify($password, $hashedPassword)) {
+    $_SESSION['username'] = $username;
+=======
 $email    = $_POST['email'] ?? '';
 $password = $_POST['password'] ?? '';
 
@@ -37,20 +56,30 @@ if ($u_id && password_verify($password, $hashedPassword)) {
 
     $_SESSION['u_id']  = $u_id;
     $_SESSION['name']  = $name;
+>>>>>>> d0c69e3dc617b67a68153a9ab340951899fd1b0b
 
     echo json_encode([
         "success" => true,
         "message" => "Login successful",
+<<<<<<< HEAD
+        "user" => [
+            "username" => $username
+=======
         "users" => [
             "u_id"  => $u_id,
             "name"  => $name,
             "email" => $email,
+>>>>>>> d0c69e3dc617b67a68153a9ab340951899fd1b0b
         ]
     ]);
 } else {
     echo json_encode([
         "success" => false,
+<<<<<<< HEAD
+        "message" => "Invalid credentials"
+=======
         "message" => "Invalid email or password"
+>>>>>>> d0c69e3dc617b67a68153a9ab340951899fd1b0b
     ]);
 }
 

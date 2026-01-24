@@ -25,6 +25,9 @@ header {
     padding: 15px 5%;
     color: white;
 }
+<<<<<<< HEAD
+
+=======
 header nav {
     display: flex;
     gap: 20px;
@@ -35,6 +38,7 @@ header nav a {
     text-decoration: none;
     font-size: 14px;
 }
+>>>>>>> d0c69e3dc617b67a68153a9ab340951899fd1b0b
 .logo-area {
     display: flex;
     align-items: center;
@@ -188,6 +192,8 @@ header nav a {
         padding: 25px 20px;
     }
 }
+<<<<<<< HEAD
+=======
 
 /* Home Page Styles */
 
@@ -365,6 +371,7 @@ footer {
             .register-info h2 { font-size: 28px; }
             .form-outer-box { padding: 25px 20px; }
         }
+<<<<<<< HEAD
 /* --- Profile Page / Register Card Styles --- */
 .hero-section {
     padding: 60px 20px;
@@ -452,3 +459,6 @@ footer {
 }
 .btn-register:hover { opacity: 0.9; transform: translateY(-1px); }
 /* Responsive media queries remain unchanged */
+=======
+>>>>>>> d0c69e3dc617b67a68153a9ab340951899fd1b0b
+>>>>>>> de500816d8cb280750ed4ca7eba64c5e6a632924
