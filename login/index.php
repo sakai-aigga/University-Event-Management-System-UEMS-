@@ -28,7 +28,7 @@ session_start();
             <a href="#">Blog</a>
             <a href="#">Registration</a>
             <a href="#">Contact</a>
-            <a href="login/" class="btn-login">Login</a>
+            
     </nav>
 </header>
 

@@ -15,7 +15,7 @@ session_destroy();
 <style></style>
     <header>
         <div class="logo-area">
-        <a href=# style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: white;">
+        <a href="../index.php" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: white;">
             <img src="../assets/images/UEMS_logo.png" class="header-logo" alt="KUEMS">
             <span class="logo-text">KUEMS</span>
         </a>
@@ -26,7 +26,6 @@ session_destroy();
             <a href="#">Blog</a>
             <a href="#">Registration</a>
             <a href="#">Contact</a>
-            <a href="login/" class="btn-login">Login</a>
         </nav>
     </header>
 

@@ -3,8 +3,7 @@ session_start();
 $isLoggedIn = isset($_SESSION['u_id']);
 $hostEventUrl = $isLoggedIn ? 'create-event.php' : 'login/';
 ?>
-
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -45,25 +44,25 @@ $hostEventUrl = $isLoggedIn ? 'create-event.php' : 'login/';
                     <span class="free-badge">FREE</span>
                     <img src="https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&q=80&w=500" class="event-img">
                     <div class="event-content">
-                        <p class="date-tag">NOV 11</p>
-                        <h3 class="event-title">Civil Festum</h3>
+                        <p class="date-tag">Dec 24</p>
+                        <h3 class="event-title">KU Music Fest</h3>
                         <p class="event-location">📍 University Auditorium</p>
                     </div>
                 </div>
                 <div class="event-card">
                     <span class="free-badge">FREE</span>
-                    <img src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&q=80&w=500" class="event-img">
+                    <img src="https://imgs.search.brave.com/CgHxpmcwxM0zdshaIqJRUuki3IlPc1U_YMcx3WEPpp0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWcu/ZnJlZXBpay5jb20v/ZnJlZS1waG90by9j/ZWxlYnJhdGlvbi1j/aHJpc3RtYXMtYmVz/dC13aXNoZXMtaGFw/cGluZXNzXzUzODc2/LTY0OTA5LmpwZz9z/ZW10PWFpc19oeWJy/aWQmdz03NDAmcT04/MA" class="event-img">
                     <div class="event-content">
-                        <p class="date-tag">NOV 14</p>
-                        <h3 class="event-title">Yoga Festum</h3>
+                        <p class="date-tag">Dec 25</p>
+                        <h3 class="event-title">Christmas Celebration</h3>
                         <p class="event-location">📍 Campus Ground</p>
                     </div>
                 </div>
                 <div class="event-card">
                     <img src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=500" class="event-img">
                     <div class="event-content">
-                        <p class="date-tag">NOV 25</p>
-                        <h3 class="event-title">Night of Melodies</h3>
+                        <p class="date-tag">Dec 31</p>
+                        <h3 class="event-title">New Year's Eve Bash</h3>
                         <p class="event-location">📍 Main Stage</p>
                     </div>
                 </div>
@@ -93,12 +92,12 @@ $hostEventUrl = $isLoggedIn ? 'create-event.php' : 'login/';
                 <div class="event-card">
                     <img src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80&w=500" class="event-img">
                     <div class="event-content">
-                        <h3 class="event-title">Conference Keynote</h3>
+                        <h3 class="event-title">Stars Global Conference</h3>
                         <p class="event-desc">Successful 2024 edition with over 500+ attendees.</p>
                     </div>
                 </div>
                 <div class="event-card">
-                    <img src="https://images.unsplash.com/photo-1540575861501-7c00117fc3f3?auto=format&fit=crop&q=80&w=500" class="event-img">
+                    <img src="https://imgs.search.brave.com/eygPWlaC_dEB6gjCwcdYGW07PF_EZs7P7aMR0-pFKU8/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93d3cu/ZXdyZGlnaXRhbC5j/b20vd3AtY29udGVu/dC91cGxvYWRzLzIw/MjIvMDEvcGFpZC1t/ZWRpYS1oZWFkZXIt/c2NhbGVkLmpwZw" class="event-img">
                     <div class="event-content">
                         <h3 class="event-title">Digital Marketing Workshop</h3>
                         <p class="event-desc">Industry experts sharing insights on growth.</p>
