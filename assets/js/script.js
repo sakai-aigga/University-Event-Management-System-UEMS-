@@ -11,7 +11,7 @@ document.getElementById('loginForm')?.addEventListener('submit', async function(
     const result = await response.json();
 
     if (result.success) {
-        window.location.href = '../profile/'; // Redirect on success
+        window.location.href = '/UEMS/University-Event-Management-System-UEMS-/index.php'; //redirect to home  on successs
     } else {
         document.getElementById('errorMessage').textContent = result.message;
     }
@@ -46,12 +46,14 @@ document.getElementById('registerForm').addEventListener('submit', async functio
     }
 });
 
-// Password visibility toggle for register page
-document.querySelectorAll('.togglePassword').forEach(el => {
-    el.addEventListener('click', () => {
-        const input = el.previousElementSibling;
-        const type = input.type === 'password' ? 'text' : 'password';
-        input.type = type;
-        el.textContent = type === 'password' ? 'Show' : 'Hide';
+// Password visibility toggle for register/login page
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.togglePassword').forEach(el => {
+        el.onclick = () => {
+            const container = el.parentElement; // the input-wrapper
+            const input = container.querySelector('input'); // get the input inside
+            input.type = input.type === 'password' ? 'text' : 'password';
+            el.textContent = input.type === 'password' ? 'Show' : 'Hide';
+        };
     });
 });
