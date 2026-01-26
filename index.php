@@ -14,7 +14,26 @@ $hostEventUrl = $isLoggedIn ? 'event/create-event.php' : 'login/';
     <link rel="stylesheet" href="assets/css/dashboard.css">
 </head>
 <body>
-   <?php include "./includes/header.php"; ?> 
+    <header>
+        <div class="logo-area">
+            <a href="index.php" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: white;">
+                <img src="assets/images/UEMS_logo.png" class="header-logo" alt="KUEMS">
+                <span class="logo-text">KUEMS</span>
+            </a>
+        </div>
+        <nav>
+                <a href="event/event-dashboard.php">Events</a>
+                <a href="uems/about.php">About</a>
+                <a href="event/create-event.php">Registration</a>
+                <a href="uems/contact.php">Contact</a>
+                <?php if (isset($_SESSION['u_id'])): ?>
+                <a href="profile/">👤 <?= htmlspecialchars($_SESSION['name']); ?></a>
+                <?php else: ?>
+                <a href="login/" class="head-btn-login">Login</a>
+                <?php endif; ?>
+            </nav>
+    </header>
+
     <main>
         <section>
             <div class="section-header">

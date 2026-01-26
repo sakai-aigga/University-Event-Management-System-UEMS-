@@ -29,7 +29,7 @@ $email = $_SESSION['email'] ;
                 <h2>Hello, <?= htmlspecialchars($_SESSION['name']) ?></h2>
                 <p>Email: <?= htmlspecialchars($_SESSION['email']) ?></p>
                 <a href="logout.php">
-                    <button class="home-btn-login">LOG OUT</button>
+                    <button class="btn-login">LOG OUT</button>
                 </a>
             </div>
         </div>

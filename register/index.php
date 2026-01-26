@@ -1,6 +1,5 @@
 <?php
 session_start();
-session_destroy();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -12,20 +11,8 @@ session_destroy();
     <link rel="stylesheet" href="../assets/css/styles.css">
 </head>
 <body>
-    <header>
-        <div class="logo-area">
-            <a href="../index.php" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: white;">
-                <img src="../assets/images/UEMS_logo.png" class="header-logo" alt="KUEMS">
-                <span class="logo-text">KUEMS</span>
-            </a>
-        </div>
-        <nav>
-                <a href="../event/event-dashboard.php">Events</a>
-                <a href="../uems/about.php">About</a>
-                <a href="../event/create-event.php">Registration</a>
-                <a href="../uems/contact.php">Contact</a>
-            </nav>
-    </header>
+       <?php include "../includes/header.php"; ?> 
+    
     <section class="hero-section">
         <div class="register-card">
             <div class="register-info">
@@ -66,23 +53,23 @@ session_destroy();
                             <span class="show-toggle togglePassword">Show</span>
                         </div>
                     </div>
+
                     <div class="form-group">
                         <label>Confirm Password</label>
                         <div class="input-wrapper pass-container">
                             <input type="password" name="confirm_password" placeholder="Confirm your password" required>
                             <span class="show-toggle togglePassword">Show</span>
                         </div>
-</div>
-                    <button type="submit" class="btn-register">Register Account</button>
+                    </div>
+                    
+                    <button type="submit" class="btn-login">Register Account</button>
                     <div id="errorMessage" style="color: red; margin-top: 10px; text-align: center;"></div>
 
                 </form>
             </div>
         </div>
     </section>
-
-    <?php include "../includes/footer.php"; ?>
-
     <script src="..\assets\js\script.js"></script>
+    <?php include "../includes/footer.php"; ?>
 </body>
 </html>
