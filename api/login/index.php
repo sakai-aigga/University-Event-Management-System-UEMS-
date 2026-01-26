@@ -37,6 +37,7 @@ if ($u_id && password_verify($password, $hashedPassword)) {
 
     $_SESSION['u_id']  = $u_id;
     $_SESSION['name']  = $name;
+    $_SESSION['email']  = $email;
 
     echo json_encode([
         "success" => true,

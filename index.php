@@ -1,7 +1,7 @@
 <?php
 session_start();
 $isLoggedIn = isset($_SESSION['u_id']);
-$hostEventUrl = $isLoggedIn ? 'create-event.php' : 'login/';
+$hostEventUrl = $isLoggedIn ? 'event/create-event.php' : 'login/';
 ?>
 <!DOCTYPE html> 
 <html lang="en">
@@ -14,23 +14,7 @@ $hostEventUrl = $isLoggedIn ? 'create-event.php' : 'login/';
     <link rel="stylesheet" href="assets/css/dashboard.css">
 </head>
 <body>
-    <header>
-        <div class="logo-area">
-        <a href=# style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: white;">
-            <img src="assets/images/UEMS_logo.png" class="header-logo" alt="KUEMS">
-            <span class="logo-text">KUEMS</span>
-        </a>
-    </div>
-        <nav>
-            <a href="#">Events</a>
-            <a href="#">About</a>
-            <a href="#">Blog</a>
-            <a href="#">Registration</a>
-            <a href="#">Contact</a>
-            <a href="login/" class="btn-login">Login</a>
-        </nav>
-    </header>
-
+   <?php include "./includes/header.php"; ?> 
     <main>
         <section>
             <div class="section-header">
@@ -111,31 +95,6 @@ $hostEventUrl = $isLoggedIn ? 'create-event.php' : 'login/';
             list-style-type: none;
         }
     </style>
-    <footer>
-    <div class="footer-grid">
-        <div class="footer-logo">
-            <h2>KUEMS</h2>
-            <p>A dedicated event management system for university students to find and host incredible experiences.</p>
-        </div>
-        <div class="footer-links">
-            <h4>Location</h4>
-            <ul>
-                <li>Hattiban, Lalitpur, Nepal
-KUSOED</li>
-            </ul>
-        </div>
-        <div class="footer-links">
-            <h4>Contact</h4>
-            <ul>
-                <li>admin@kusoed.edu.np</li>
-                <li>15314105, 15912524</li>
-            </ul>
-        </div>
-    </div>
-    <p style="text-align:center; font-size:12px; opacity:0.5; margin-top:30px; padding-top:20px; border-top:1px solid rgba(255,255,255,0.1);">
-        © 2025 KUEMS. All rights reserved.
-    </p>
-</footer>
-
+    <?php include "./includes/footer.php"; ?>
 </body>
 </html>

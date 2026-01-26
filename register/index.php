@@ -12,23 +12,20 @@ session_destroy();
     <link rel="stylesheet" href="../assets/css/styles.css">
 </head>
 <body>
-<style></style>
     <header>
         <div class="logo-area">
-        <a href="../index.php" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: white;">
-            <img src="../assets/images/UEMS_logo.png" class="header-logo" alt="KUEMS">
-            <span class="logo-text">KUEMS</span>
-        </a>
-    </div>
+            <a href="../index.php" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: white;">
+                <img src="../assets/images/UEMS_logo.png" class="header-logo" alt="KUEMS">
+                <span class="logo-text">KUEMS</span>
+            </a>
+        </div>
         <nav>
-            <a href="#">Events</a>
-            <a href="#">About</a>
-            <a href="#">Blog</a>
-            <a href="#">Registration</a>
-            <a href="#">Contact</a>
-        </nav>
+                <a href="../event/event-dashboard.php">Events</a>
+                <a href="../uems/about.php">About</a>
+                <a href="../event/create-event.php">Registration</a>
+                <a href="../uems/contact.php">Contact</a>
+            </nav>
     </header>
-
     <section class="hero-section">
         <div class="register-card">
             <div class="register-info">
@@ -84,31 +81,7 @@ session_destroy();
         </div>
     </section>
 
-    <footer>
-    <div class="footer-grid">
-        <div class="footer-logo">
-            <h2>KUEMS</h2>
-            <p>A dedicated event management system for university students to find and host incredible experiences.</p>
-        </div>
-        <div class="footer-links">
-            <h4>Location</h4>
-            <ul>
-                <li>Hattiban, Lalitpur, Nepal
-KUSOED</li>
-            </ul>
-        </div>
-        <div class="footer-links">
-            <h4>Contact</h4>
-            <ul>
-                <li>admin@kusoed.edu.np</li>
-                <li>15314105, 15912524</li>
-            </ul>
-        </div>
-    </div>
-    <p style="text-align:center; font-size:12px; opacity:0.5; margin-top:30px; padding-top:20px; border-top:1px solid rgba(255,255,255,0.1);">
-        © 2025 KUEMS. All rights reserved.
-    </p>
-</footer>
+    <?php include "../includes/footer.php"; ?>
 
     <script src="..\assets\js\script.js"></script>
 </body>

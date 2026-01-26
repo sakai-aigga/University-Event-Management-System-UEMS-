@@ -141,9 +141,10 @@ header nav a {
     width: 100%;
     background-color: var(--pink-accent);
     color: white;
-    border: none;
-    padding: 14px;
-    border-radius: 30px;
+    border: 1px solid white;
+    padding: 12px 30px;
+    border-radius: 20px;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
     transition: 0.3s;
@@ -188,36 +189,6 @@ header nav a {
         padding: 25px 20px;
     }
 }
-
-/* Home Page Styles */
-
-.home-actions {
-    text-align: center;
-}
-
-.home-actions a {
-    display: block;
-    text-decoration: none;
-}
-
-.home-btn-login  {
-    width: 100%;
-    background-color: var(--pink-accent);
-    color: rgb(178, 56, 56);
-    border: none;
-    padding: 14px;
-    border-radius: 30px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: 0.3s;
-    background-color: #4a00e0;
-}
-.home-btn-login:hover {
-    filter: brightness(1.1);
-}
-
-
-
 
 /*CSS FOR Register page*/
 .hero-section {
@@ -320,8 +291,6 @@ footer {
     gap: 50px;
 }
 
-.footer-logo h2 { margin-bottom: 20px; }
-.footer-logo p { font-size: 13px; opacity: 0.7; line-height: 1.8; }
 .footer-links ul { list-style: none; }
 .footer-links li { margin-bottom: 12px; font-size: 14px; opacity: 0.8; }
 
@@ -331,18 +300,6 @@ footer {
     padding: 5px;
     border-radius: 30px;
     margin-top: 15px;
-}
-.newsletter-box input {
-    border: none; padding: 10px 20px; flex: 1; border-radius: 30px; outline: none;
-}
-.btn-subscribe {
-    background-color: var(--pink-accent);
-    color: white;
-    border: none;
-    padding: 10px 25px;
-    border-radius: 25px;
-    cursor: pointer;
-    font-weight: 600;
 }
         /* --- MEDIA QUERIES --- */
         @media (max-width: 992px) {
@@ -355,9 +312,6 @@ footer {
             header { padding: 15px 5%; flex-direction: column; gap: 15px; }
             nav { gap: 15px; font-size: 12px; }
             .footer-grid { grid-template-columns: 1fr; text-align: center; }
-            .newsletter-box { flex-direction: column; background: transparent; gap: 10px; }
-            .newsletter-box input { border-radius: 12px; }
-            .btn-subscribe { border-radius: 12px; }
         }
 
         @media (max-width: 480px) {
@@ -365,6 +319,7 @@ footer {
             .register-info h2 { font-size: 28px; }
             .form-outer-box { padding: 25px 20px; }
         }
+        
 /* --- Profile Page / Register Card Styles --- */
 .hero-section {
     padding: 60px 20px;
