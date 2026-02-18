@@ -1,6 +1,18 @@
 <?php
 session_start();
+//Redirect to different page if already logged in
+if (isset($_SESSION['role'])) {
+    if ($_SESSION['role'] === 'admin') {
+        header("Location: ../admin-panel/");
+    } else {
+        header("Location: ../index.php");
+    }
+    exit();
+}
+
+
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -15,7 +27,6 @@ session_start();
 <body>
 
     <?php include "../includes/header.php"; ?> 
-
     <section class="hero-section">
         <div class="login-card">
                 <div class="login-info">
