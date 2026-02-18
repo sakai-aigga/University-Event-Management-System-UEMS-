@@ -224,6 +224,18 @@ header nav a {
     filter: brightness(1.1);
     transform: translateY(-1px);
 }
+.btn-all-events {
+    width: 150px;
+    background-color: var(--pink-accent);
+    color: white;
+    border: 1px solid white;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 10px 10px;
+    cursor: pointer;
+    transition: 0.3s;
+}
 
 /* Footer */
 footer {

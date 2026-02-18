@@ -111,7 +111,7 @@ main section {
     overflow: hidden;
     box-shadow: var(--card-shadow);
     transition: 0.3s;
-    position: relative;
+    position: top;
 }
 .event-card:hover {
     transform: translateY(-10px);
