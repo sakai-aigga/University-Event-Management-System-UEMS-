@@ -22,6 +22,7 @@ UEMS is a simple event management application built with PHP, JavaScript, CSS an
 ## 🗂️ Project Structure
 ```
 /
+├── admin-panel/      # Admin side dashboard and features
 ├── api/              # Server endpoints (PHP)
 ├── assets/           # Stylesheets & images
 ├── includes/         # Database Connection
@@ -29,6 +30,7 @@ UEMS is a simple event management application built with PHP, JavaScript, CSS an
 ├── profile/          # User profile page
 ├── register/         # Registration logic
 ├── index.php         # Main landing page
+├── uems/             # About and Contact page
 └── README.md
 ```
 ## 🚀 Installation
