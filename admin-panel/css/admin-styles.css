@@ -1,0 +1,538 @@
+/* ===================================================
+   UEMS Admin Panel — Custom Stylesheet
+   All styling for the admin panel lives here.
+   Supplements AdminLTE + Bootstrap 5
+   =================================================== */
+
+/* ===================== LAYOUT ===================== */
+.content-header-bar {
+    padding: 0 10px;
+    background-color: #f4f6f9;
+    border-bottom: none !important;
+}
+
+.breadcrumb-row {
+    margin-bottom: 0.5rem;
+}
+
+.admin-page-title {
+    margin: 0;
+    color: #343a40;
+}
+
+.admin-breadcrumb {
+    float: right;
+}
+
+@media (max-width: 575.98px) {
+    .admin-breadcrumb {
+        float: none;
+    }
+}
+
+/* =================== SIDEBAR ==================== */
+.admin-brand-logo {
+    border-radius: 50%;
+    background-color: #fff;
+}
+
+.admin-brand-text {
+    font-weight: 300;
+}
+
+.admin-user-panel {
+    margin-top: 1rem;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.admin-user-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+.sidebar-user-avatar {
+    width: 35px;
+    height: 35px;
+    object-fit: cover;
+    border-radius: 50%;
+    background-color: #fff;
+}
+
+.admin-user-info {
+    color: #fff;
+    margin-left: 0.5rem;
+}
+
+.admin-greeting {
+    display: block;
+    font-weight: 300;
+}
+
+.admin-username {
+    font-weight: 700;
+}
+
+.admin-sidebar-nav {
+    margin-top: 0.5rem;
+}
+
+.admin-logout-item {
+    margin-top: 1rem;
+}
+
+.admin-logout-link {
+    color: #dc3545 !important;
+}
+
+/* =================== FOOTER ===================== */
+.admin-footer-version {
+    float: right;
+    display: none;
+}
+
+@media (min-width: 576px) {
+    .admin-footer-version {
+        display: inline-block;
+    }
+}
+
+/* ================ DASHBOARD STATS =============== */
+.admin-stat-primary {
+    background-color: #007bff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.admin-stat-warning {
+    background-color: #ffc107;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.admin-stat-icon-dim {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.small-box {
+    border-radius: 8px;
+    transition: transform 0.2s;
+}
+
+.small-box:hover {
+    transform: translateY(-3px);
+}
+
+/* ================ CARDS (SHARED) ================ */
+.admin-card {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    border: none;
+}
+
+.admin-card-header {
+    background-color: #fff;
+}
+
+.admin-card-header-flex {
+    background-color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* ================ TABLES (SHARED) =============== */
+.admin-table-wrapper {
+    padding: 0;
+}
+
+.admin-table {
+    white-space: nowrap;
+}
+
+.admin-table thead {
+    background-color: #f8f9fa;
+}
+
+.admin-cell-bold {
+    font-weight: 600;
+}
+
+.admin-empty-row {
+    text-align: center;
+    padding: 1.5rem 0.75rem;
+    color: #6c757d;
+}
+
+/* ============= MODALS (SHARED) ================== */
+.admin-modal-header-primary {
+    background-color: #007bff;
+    color: #fff;
+    border-bottom: none;
+    padding: 15px 20px;
+}
+
+.admin-modal-header-secondary {
+    background-color: #6c757d;
+    color: #fff;
+    border-bottom: none;
+    padding: 15px 20px;
+}
+
+.admin-modal-title {
+    font-weight: 700;
+}
+
+.admin-modal-title i {
+    margin-right: 0.5rem;
+}
+
+.admin-modal-body {
+    padding: 1.5rem;
+}
+
+.admin-modal-footer {
+    background-color: #f8f9fa;
+    border-top: none;
+    padding: 12px 20px;
+}
+
+.admin-modal-content {
+    border: none;
+}
+
+/* ============= FORMS (SHARED) =================== */
+.admin-form-label {
+    font-weight: 600;
+    color: #6c757d;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+}
+
+.admin-input-flat {
+    border: none;
+    background-color: #f4f6f9;
+    border-radius: 6px;
+}
+
+.admin-form-spacing {
+    margin-bottom: 1rem;
+}
+
+.admin-form-spacing-lg {
+    margin-bottom: 1.5rem;
+}
+
+.admin-form-no-margin {
+    margin-bottom: 0;
+}
+
+/* ============= BUTTONS (SHARED) ================= */
+.admin-btn-submit {
+    padding-left: 3rem;
+    padding-right: 3rem;
+    font-weight: 700;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.admin-btn-submit i {
+    margin-right: 0.25rem;
+}
+
+.admin-btn-wide {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    font-weight: 700;
+}
+
+.admin-btn-icon i {
+    margin-right: 0.5rem;
+}
+
+.admin-btn-spaced {
+    margin-right: 0.5rem;
+}
+
+.admin-btn-add {
+    margin-left: auto;
+}
+
+.admin-cancel-link {
+    color: #6c757d;
+}
+
+/* =============== PROFILE PAGE =================== */
+.admin-profile-row {
+    display: flex;
+    justify-content: center;
+}
+
+.admin-profile-card {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: none;
+}
+
+.admin-profile-body {
+    padding: 1.5rem;
+}
+
+.admin-profile-avatar-section {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.admin-profile-avatar-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.admin-profile-avatar-img {
+    width: 110px;
+    height: 110px;
+    object-fit: cover;
+}
+
+.admin-profile-online-dot {
+    width: 14px;
+    height: 14px;
+    background-color: #28a745;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+}
+
+.admin-profile-name {
+    text-align: center;
+    font-weight: 700;
+    margin-top: 1rem;
+    margin-bottom: 0.25rem;
+}
+
+.admin-profile-subtitle {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #6c757d;
+    margin-bottom: 0;
+}
+
+.admin-profile-details {
+    margin-bottom: 1.5rem;
+}
+
+.admin-profile-detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.admin-profile-detail-row:last-child {
+    border-bottom: none;
+}
+
+.admin-profile-detail-label {
+    color: #6c757d;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.admin-profile-detail-label i {
+    width: 20px;
+    text-align: center;
+    margin-right: 0.5rem;
+}
+
+.admin-profile-detail-label .icon-email {
+    color: #007bff;
+}
+
+.admin-profile-detail-label .icon-phone {
+    color: #28a745;
+}
+
+.admin-profile-detail-value {
+    color: #343a40;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.admin-profile-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.admin-profile-actions .btn {
+    padding: 10px;
+    font-weight: 700;
+    width: 100%;
+}
+
+.admin-profile-logout {
+    text-align: center;
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+}
+
+.admin-profile-logout a {
+    color: #dc3545;
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: opacity 0.2s;
+}
+
+.admin-profile-logout a:hover {
+    opacity: 0.7;
+}
+
+.admin-profile-logout a i {
+    margin-right: 0.25rem;
+}
+
+/* ============= COOLDOWN ALERTS ================== */
+.admin-cooldown-alert {
+    font-size: 0.85rem;
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: none;
+    margin-top: 1rem;
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+.admin-cooldown-alert i {
+    margin-right: 0.5rem;
+}
+
+/* ============ EVENTS: MANAGE PAGE =============== */
+.admin-event-title {
+    font-weight: 600;
+}
+
+/* =========== EVENTS: CREATE PAGE ================ */
+.admin-create-container {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.admin-create-header {
+    margin-bottom: 1.5rem;
+}
+
+.admin-create-title {
+    color: #343a40;
+    font-weight: 700;
+}
+
+.admin-create-title i {
+    margin-right: 0.5rem;
+    color: #007bff;
+}
+
+.admin-create-subtitle {
+    color: #6c757d;
+}
+
+.admin-create-card {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: none;
+}
+
+.admin-create-card-header {
+    background-color: #fff;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}
+
+.admin-create-card-title {
+    font-weight: 700;
+}
+
+.admin-create-card-title i {
+    margin-right: 0.25rem;
+    color: #17a2b8;
+}
+
+.admin-form-body {
+    padding: 1.5rem;
+}
+
+.admin-form-label-required {
+    font-weight: 600;
+}
+
+.admin-form-label-required .required-star {
+    color: #dc3545;
+}
+
+.admin-input-lg {
+    border-color: #007bff;
+    font-size: 1.1rem;
+}
+
+.admin-help-text {
+    color: #6c757d;
+    font-size: 0.85rem;
+}
+
+.admin-form-group-spaced {
+    margin-top: 1.5rem;
+}
+
+.admin-icon-primary {
+    color: #007bff;
+}
+
+.admin-icon-danger {
+    color: #dc3545;
+}
+
+.admin-icon-success {
+    color: #28a745;
+}
+
+.admin-form-footer {
+    background-color: #f8f9fa;
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.admin-discard-link {
+    color: #6c757d;
+}
+
+.admin-discard-link i {
+    margin-right: 0.25rem;
+}
+
+/* ============= DEPARTMENTS PAGE ================= */
+.admin-center-col {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* =============== UTILITIES ====================== */
+.font-weight-600 {
+    font-weight: 600 !important;
+}
+
+.font-weight-700 {
+    font-weight: 700 !important;
+}
+
+/* Smooth transitions */
+.btn,
+.card,
+.nav-link {
+    transition: all 0.2s ease;
+}
