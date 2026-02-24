@@ -3,7 +3,6 @@ session_start();
 require_once 'includes/db-config.php';
 $isLoggedIn = isset($_SESSION['u_id']);
 $hostEventUrl = $isLoggedIn ? 'uems/contact.php' : 'login/';
-$seeEventUrl = 'event/event-dashboard.php';
 
 // Fetch Upcoming Events with registration and count check
 $u_id = isset($_SESSION['u_id']) ? $_SESSION['u_id'] : 0;
@@ -13,7 +12,7 @@ $upcoming_sql = "SELECT e.*,
                  FROM event e 
                  LEFT JOIN registration r_check ON e.event_id = r_check.event_id AND r_check.u_id = $u_id
                  WHERE e.is_published = 1 AND e.event_date >= CURDATE() 
-                 ORDER BY e.event_date ASC LIMIT 3";
+                 ORDER BY e.event_date ASC";
 $upcoming_result = $conn->query($upcoming_sql);
 
 // Fetch Past Events with registration and count check
@@ -23,7 +22,7 @@ $past_sql = "SELECT e.*,
              FROM event e 
              LEFT JOIN registration r_check ON e.event_id = r_check.event_id AND r_check.u_id = $u_id
              WHERE e.is_published = 1 AND e.event_date < CURDATE() 
-             ORDER BY e.event_date DESC LIMIT 2";
+             ORDER BY e.event_date DESC";
 $past_result = $conn->query($past_sql);
 
 $cat_map = [1=>'Academic', 2=>'Workshop', 3=>'Sports', 4=>'Cultural'];
@@ -33,30 +32,13 @@ $cat_map = [1=>'Academic', 2=>'Workshop', 3=>'Sports', 4=>'Cultural'];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KUEMS - Home | Discover Events</title>
+    <title>KUEMS - Discover All Events</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <header>
-        <div class="logo-area">
-            <a href="index.php" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: white;">
-                <img src="assets/images/UEMS_logo.png" class="header-logo" alt="KUEMS">
-                <span class="logo-text">KUEMS</span>
-            </a>
-        </div>
-        <nav>
-                <a href="event/event-dashboard.php">Events</a>
-                <a href="uems/about.php">About</a>
-                <a href="uems/contact.php">Contact</a>
-                <?php if (isset($_SESSION['u_id'])): ?>
-                <a href="profile/">👤 <?= htmlspecialchars($_SESSION['name']); ?></a>
-                <?php else: ?>
-                <a href="login/" class="head-btn-login">Login</a>
-                <?php endif; ?>
-            </nav>
-    </header>
+    <?php include "includes/header.php"; ?>
 
     <main>
         <section>
@@ -65,7 +47,6 @@ $cat_map = [1=>'Academic', 2=>'Workshop', 3=>'Sports', 4=>'Cultural'];
                 <div class="filters">
                 </div>
             </div>
-
             <div class="events-grid">
                 <?php if ($upcoming_result && $upcoming_result->num_rows > 0): ?>
                     <?php while($row = $upcoming_result->fetch_assoc()): ?>
@@ -75,13 +56,7 @@ $cat_map = [1=>'Academic', 2=>'Workshop', 3=>'Sports', 4=>'Cultural'];
                     <p class="no-events">No upcoming events at the moment.</p>
                 <?php endif; ?>
             </div>
-            <br><br>
-            <a href="<?= htmlspecialchars($seeEventUrl) ?>">
-            <button class="btn-all-events">See All Events</button>
-            </a>
-
         </section>
-
         <section class="cta-section">
             <div class="cta-banner">
                 <img src="https://cdn-icons-png.flaticon.com/512/4341/4341134.png" width="150" alt="CTA">
