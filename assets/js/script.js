@@ -1,8 +1,9 @@
 // Handle login form submission
-document.getElementById('loginForm')?.addEventListener('submit', async function(e) {
-    e.preventDefault(); // Prevent normal form submit
+document.getElementById('loginForm')?.addEventListener('submit', async function (e) {
+    e.preventDefault();
 
     const formData = new FormData(this);
+
     const response = await fetch('../api/login/index.php', {
         method: 'POST',
         body: formData
@@ -11,10 +12,15 @@ document.getElementById('loginForm')?.addEventListener('submit', async function(
     const result = await response.json();
 
     if (result.success) {
-        window.location.href = '/UEMS/University-Event-Management-System-UEMS-/index.php'; //redirect to home  on successs
+        if (result.role === 'admin') {
+            window.location.href = '/UEMS/University-Event-Management-System-UEMS-/admin-panel/';
+        } else {
+            window.location.href = '/UEMS/University-Event-Management-System-UEMS-/index.php';
+        }
     } else {
         document.getElementById('errorMessage').textContent = result.message;
     }
+
 });
 
 // Handle register form submission
