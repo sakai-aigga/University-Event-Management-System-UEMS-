@@ -1,7 +1,32 @@
 <?php
 session_start();
+require_once 'includes/db-config.php';
 $isLoggedIn = isset($_SESSION['u_id']);
-$hostEventUrl = $isLoggedIn ? 'event/create-event.php' : 'login/';
+$hostEventUrl = $isLoggedIn ? 'uems/contact.php' : 'login/';
+$seeEventUrl = 'event/event-dashboard.php';
+
+// Fetch Upcoming Events with registration and count check
+$u_id = isset($_SESSION['u_id']) ? $_SESSION['u_id'] : 0;
+$upcoming_sql = "SELECT e.*, 
+                 r_check.reg_id as is_registered,
+                 (SELECT COUNT(*) FROM registration r2 WHERE r2.event_id = e.event_id) as current_participants
+                 FROM event e 
+                 LEFT JOIN registration r_check ON e.event_id = r_check.event_id AND r_check.u_id = $u_id
+                 WHERE e.is_published = 1 AND e.event_date >= CURDATE() 
+                 ORDER BY e.event_date ASC LIMIT 3";
+$upcoming_result = $conn->query($upcoming_sql);
+
+// Fetch Past Events with registration and count check
+$past_sql = "SELECT e.*, 
+             r_check.reg_id as is_registered,
+             (SELECT COUNT(*) FROM registration r2 WHERE r2.event_id = e.event_id) as current_participants
+             FROM event e 
+             LEFT JOIN registration r_check ON e.event_id = r_check.event_id AND r_check.u_id = $u_id
+             WHERE e.is_published = 1 AND e.event_date < CURDATE() 
+             ORDER BY e.event_date DESC LIMIT 2";
+$past_result = $conn->query($past_sql);
+
+$cat_map = [1=>'Academic', 2=>'Workshop', 3=>'Sports', 4=>'Cultural'];
 ?>
 <!DOCTYPE html> 
 <html lang="en">
@@ -11,7 +36,7 @@ $hostEventUrl = $isLoggedIn ? 'event/create-event.php' : 'login/';
     <title>KUEMS - Home | Discover Events</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/styles.css">
-    <link rel="stylesheet" href="assets/css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <header>
@@ -24,7 +49,6 @@ $hostEventUrl = $isLoggedIn ? 'event/create-event.php' : 'login/';
         <nav>
                 <a href="event/event-dashboard.php">Events</a>
                 <a href="uems/about.php">About</a>
-                <a href="event/create-event.php">Registration</a>
                 <a href="uems/contact.php">Contact</a>
                 <?php if (isset($_SESSION['u_id'])): ?>
                 <a href="profile/">👤 <?= htmlspecialchars($_SESSION['name']); ?></a>
@@ -37,51 +61,33 @@ $hostEventUrl = $isLoggedIn ? 'event/create-event.php' : 'login/';
     <main>
         <section>
             <div class="section-header">
-                <h2>Upcoming Events</h2>
+                <h2>Featured Events</h2>
                 <div class="filters">
                 </div>
             </div>
 
             <div class="events-grid">
-                <div class="event-card">
-                    <span class="free-badge">FREE</span>
-                    <img src="https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&q=80&w=500" class="event-img">
-                    <div class="event-content">
-                        <p class="date-tag">Dec 24</p>
-                        <h3 class="event-title">KU Music Fest</h3>
-                        <p class="event-location">📍 University Auditorium</p>
-                    </div>
-                </div>
-                <div class="event-card">
-                    <span class="free-badge">FREE</span>
-                    <img src="https://imgs.search.brave.com/CgHxpmcwxM0zdshaIqJRUuki3IlPc1U_YMcx3WEPpp0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWcu/ZnJlZXBpay5jb20v/ZnJlZS1waG90by9j/ZWxlYnJhdGlvbi1j/aHJpc3RtYXMtYmVz/dC13aXNoZXMtaGFw/cGluZXNzXzUzODc2/LTY0OTA5LmpwZz9z/ZW10PWFpc19oeWJy/aWQmdz03NDAmcT04/MA" class="event-img">
-                    <div class="event-content">
-                        <p class="date-tag">Dec 25</p>
-                        <h3 class="event-title">Christmas Celebration</h3>
-                        <p class="event-location">📍 Campus Ground</p>
-                    </div>
-                </div>
-                <div class="event-card">
-                    <img src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=500" class="event-img">
-                    <div class="event-content">
-                        <p class="date-tag">Dec 31</p>
-                        <h3 class="event-title">New Year's Eve Bash</h3>
-                        <p class="event-location">📍 Main Stage</p>
-                    </div>
-                </div>
+                <?php if ($upcoming_result && $upcoming_result->num_rows > 0): ?>
+                    <?php while($row = $upcoming_result->fetch_assoc()): ?>
+                        <?php include "event/event_card.php"; ?>
+                    <?php endwhile; ?>
+                <?php else: ?>
+                    <p class="no-events">No upcoming events at the moment.</p>
+                <?php endif; ?>
             </div>
             <br><br>
-            <div class="see-all-container">
-                <button class="btn-outline">See All Events</button>
-            </div>
+            <a href="<?= htmlspecialchars($seeEventUrl) ?>">
+            <button class="btn-all-events">See All Events</button>
+            </a>
+
         </section>
 
         <section class="cta-section">
             <div class="cta-banner">
                 <img src="https://cdn-icons-png.flaticon.com/512/4341/4341134.png" width="150" alt="CTA">
                 <div class="cta-content">
-                    <h3>Add Your Loving Event</h3>
-                    <p>Register your event and reach thousands of students.</p>
+                    <h3>Want to Host Your Loving Event?</h3>
+                    <p>Contact us Now and Register your event and reach thousands of students.</p>
                 </div>
                 <a href="<?= htmlspecialchars($hostEventUrl) ?>" class="btn-pink" style="text-decoration: none; display: inline-block; color: white;">Host An Event</a>
             </div>
@@ -92,20 +98,13 @@ $hostEventUrl = $isLoggedIn ? 'event/create-event.php' : 'login/';
                 <h2>Past Successful Events</h2>
             </div>
             <div class="events-grid">
-                <div class="event-card">
-                    <img src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80&w=500" class="event-img">
-                    <div class="event-content">
-                        <h3 class="event-title">Stars Global Conference</h3>
-                        <p class="event-desc">Successful 2024 edition with over 500+ attendees.</p>
-                    </div>
-                </div>
-                <div class="event-card">
-                    <img src="https://imgs.search.brave.com/eygPWlaC_dEB6gjCwcdYGW07PF_EZs7P7aMR0-pFKU8/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93d3cu/ZXdyZGlnaXRhbC5j/b20vd3AtY29udGVu/dC91cGxvYWRzLzIw/MjIvMDEvcGFpZC1t/ZWRpYS1oZWFkZXIt/c2NhbGVkLmpwZw" class="event-img">
-                    <div class="event-content">
-                        <h3 class="event-title">Digital Marketing Workshop</h3>
-                        <p class="event-desc">Industry experts sharing insights on growth.</p>
-                    </div>
-                </div>
+                <?php if ($past_result && $past_result->num_rows > 0): ?>
+                    <?php while($row = $past_result->fetch_assoc()): ?>
+                        <?php include "event/event_card.php"; ?>
+                    <?php endwhile; ?>
+                <?php else: ?>
+                    <p class="no-events">No past events to display.</p>
+                <?php endif; ?>
             </div>
         </section>
     </main>
@@ -115,5 +114,6 @@ $hostEventUrl = $isLoggedIn ? 'event/create-event.php' : 'login/';
         }
     </style>
     <?php include "./includes/footer.php"; ?>
+    <?php include "event/event_popup.php"; ?>
 </body>
 </html>
