@@ -2,6 +2,7 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+$isLoggedIn = isset($_SESSION['u_id']);
 include_once __DIR__ . '/path-config.php';
 ?>
 
@@ -14,10 +15,14 @@ include_once __DIR__ . '/path-config.php';
 </div>
 
     <nav>
-        <a href="<?= BASE_URL ?>/event/event-dashboard.php">Events</a>
+        <a href="<?= BASE_URL ?>/event/my-events.php">My Events</a>
         <a href="<?= BASE_URL ?>/uems/about.php">About</a>
-        <a href="<?= BASE_URL ?>/event/create-event.php">Registration</a>
         <a href="<?= BASE_URL ?>/uems/contact.php">Contact</a>
+        <?php if ($isLoggedIn): ?>
+            <a href="<?= BASE_URL ?>/profile/">👤 <?= htmlspecialchars($_SESSION['name']); ?></a>
+            <?php else: ?>
+            <a href="<?= BASE_URL ?>/login/" class="head-btn-login">Login</a>
+        <?php endif; ?>
     </nav>
 </header>
 
