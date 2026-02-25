@@ -70,14 +70,15 @@
 <script>
     let currentEventId = null;
 
-    function showEventDetails(eventId) {
+    function showEventDetails(eventId, startWithRegForm = false) {
         currentEventId = eventId;
+        document.getElementById('regEventId').value = eventId;
         const modal = document.getElementById('eventDetailModal');
         const isEventFolder = window.location.pathname.includes('/event/');
         const apiUrl = isEventFolder ? '../api/events/get-events.php' : 'api/events/get-events.php';
         
         // Reset states
-        toggleRegForm(false);
+        toggleRegForm(startWithRegForm);
         document.getElementById('regMessage').style.display = 'none';
 
         fetch(`${apiUrl}?id=${eventId}`)

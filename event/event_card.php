@@ -46,7 +46,7 @@ $is_full = ($max_cap > 0 && $current_part >= $max_cap);
                     <?php if ($is_full): ?>
                         <button type="button" class="btn-register" style="background: #e5e7eb; color: #6b7280; cursor: not-allowed;" onclick="event.stopPropagation()">Fully Booked</button>
                     <?php else: ?>
-                        <a href="<?php echo basename($_SERVER['PHP_SELF']) == 'index.php' ? 'login/' : '../login/'; ?>" class="btn-register btn-blue" onclick="event.stopPropagation()">Login to Register</a>
+                        <button type="button" class="btn-register btn-blue" onclick="event.stopPropagation(); showEventDetails(<?php echo $row['event_id']; ?>, true)">Login to Register</button>
                     <?php endif; ?>
                 <?php endif; ?>
             </div>
