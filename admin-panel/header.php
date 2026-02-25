@@ -99,15 +99,6 @@ $active_page = $active_pageInfo['active_page'] ?? null;
 <body class="hold-transition sidebar-mini">
     <div class="wrapper">
 
-        <nav class="main-header navbar navbar-expand navbar-white navbar-light">
-            <ul class="navbar-nav">
-                <li class="nav-item">
-                    <a class="nav-link" data-widget="pushmenu" role="button">
-                        <i class="fas fa-bars"></i>
-                    </a>
-                </li>
-            </ul>
-        </nav>
 
         <div class="main-header content-header-bar">
             <div class="content-header">
