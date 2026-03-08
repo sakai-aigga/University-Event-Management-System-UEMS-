@@ -44,7 +44,7 @@ function sendMail($to, $subject, $message, $replyTo = null) {
         $mail->Body    = $message;
 
         $mail->send();
-        return ["success" => true, "message" => "Message sentiment successfully"];
+        return ["success" => true, "message" => "Message sent successfully"];
     } catch (Exception $e) {
         return ["success" => false, "message" => "Message could not be sent. Mailer Error: {$mail->ErrorInfo}"];
     }
