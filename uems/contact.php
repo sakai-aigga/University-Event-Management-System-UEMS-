@@ -163,20 +163,103 @@ if (session_status() === PHP_SESSION_NONE) {
         </div>
     </main>
 
+    <?php include "../includes/login_modal.php"; ?>
+
     <script>
-        // Use the common script.js for base logic, adding specific handler here
+        const isLoggedIn = <?php echo $isLoggedIn ? 'true' : 'false'; ?>;
+
+        // Auto-submit if there's a pending message after login
+        document.addEventListener('DOMContentLoaded', () => {
+            const pending = sessionStorage.getItem('pendingContactMessage');
+            if (pending && isLoggedIn) {
+                const data = JSON.parse(pending);
+                const form = document.getElementById('contactForm');
+                if (form) {
+                    form.elements['name'].value = data.name;
+                    form.elements['email'].value = data.email;
+                    form.elements['message'].value = data.message;
+                    
+                    // Attempt to send automatically
+                    sendContactMessage(data);
+                }
+            }
+        });
+
         document.getElementById('contactForm')?.addEventListener('submit', function (e) {
             e.preventDefault();
-            const msgBox = document.getElementById('contactMessage');
-            msgBox.style.color = "#10b981";
-            msgBox.textContent = 'Authenticating your request...';
             
-            // Mock submission feedback
-            setTimeout(() => {
-                msgBox.textContent = 'Thank you! Your message has been sent successfully.';
-                this.reset();
-            }, 1000);
+            const formData = new FormData(this);
+            const data = {
+                name: formData.get('name'),
+                email: formData.get('email'),
+                message: formData.get('message')
+            };
+
+            if (!isLoggedIn) {
+                // Save data and prompt login
+                sessionStorage.setItem('pendingContactMessage', JSON.stringify(data));
+                if (typeof openLoginModal === 'function') {
+                    openLoginModal();
+                    const modalMsg = document.getElementById('loginModalMessage');
+                    if (modalMsg) {
+                        modalMsg.textContent = 'Please login to send your message. Your input will be saved.';
+                        modalMsg.className = 'message info';
+                        modalMsg.style.display = 'block';
+                        modalMsg.style.color = 'var(--dark-purple)';
+                    }
+                } else {
+                    alert('Please login to send a message.');
+                    window.location.href = '../login/';
+                }
+                return;
+            }
+
+            sendContactMessage(data);
         });
+
+        async function sendContactMessage(data) {
+            const msgBox = document.getElementById('contactMessage');
+            const submitBtn = document.querySelector('#contactForm button[type="submit"]');
+            
+            msgBox.style.color = "#3b82f6";
+            msgBox.textContent = 'Sending message...';
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerText = 'Sending...';
+            }
+
+            const formData = new FormData();
+            for (const key in data) {
+                formData.append(key, data[key]);
+            }
+
+            try {
+                const response = await fetch('../api/contact.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    msgBox.style.color = "#10b981";
+                    msgBox.textContent = result.message || 'Thank you! Your message has been sent successfully.';
+                    document.getElementById('contactForm')?.reset();
+                    sessionStorage.removeItem('pendingContactMessage');
+                } else {
+                    msgBox.style.color = "#ef4444";
+                    msgBox.textContent = result.message || 'Error sending message.';
+                }
+            } catch (error) {
+                msgBox.style.color = "#ef4444";
+                msgBox.textContent = 'Network error. Please try again later.';
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = 'Send Message';
+                }
+            }
+        }
     </script>
     
     <script src="../assets/js/script.js"></script>
