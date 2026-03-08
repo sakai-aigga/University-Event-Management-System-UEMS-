@@ -9,10 +9,10 @@ if (!isset($_SESSION['u_id'])) {
 
 // Fetch complete user data
 $u_id = $_SESSION['u_id'];
-$stmt = $conn->prepare("SELECT name, email, contact, role FROM users WHERE u_id = ?");
+$stmt = $conn->prepare("SELECT name, email, contact FROM users WHERE u_id = ?");
 $stmt->bind_param("i", $u_id);
 $stmt->execute();
-$stmt->bind_result($name, $email, $contact, $role);
+$stmt->bind_result($name, $email, $contact);
 $stmt->fetch();
 $stmt->close();
 ?>
@@ -167,10 +167,6 @@ $stmt->close();
                 <div class="detail-item">
                     <label>Contact Number</label>
                     <p><?= htmlspecialchars($contact ?: 'Not Provided') ?></p>
-                </div>
-                <div class="detail-item">
-                    <label>User Role</label>
-                    <p style="text-transform: capitalize;"><?= htmlspecialchars($role ?: 'User') ?></p>
                 </div>
             </div>
 
