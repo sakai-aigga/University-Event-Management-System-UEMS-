@@ -47,12 +47,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
 require_once '../header.php';
 
-// Fetch all events
-$sql = "SELECT e.*, u.name as organizer 
-        FROM event e 
-        LEFT JOIN users u ON e.u_id = u.u_id 
-        ORDER BY e.event_date DESC";
-$result = $conn->query($sql);
+// Fetch Active events
+$sql_active = "SELECT e.*, u.name as organizer 
+               FROM event e 
+               LEFT JOIN users u ON e.u_id = u.u_id 
+               WHERE e.event_date >= CURDATE()
+               ORDER BY e.event_date ASC";
+$result_active = $conn->query($sql_active);
+
+// Fetch Past events
+$sql_past = "SELECT e.*, u.name as organizer 
+             FROM event e 
+             LEFT JOIN users u ON e.u_id = u.u_id 
+             WHERE e.event_date < CURDATE()
+             ORDER BY e.event_date DESC";
+$result_past = $conn->query($sql_past);
 
 $categories = [
     1 => "🎓 General",
@@ -66,7 +75,7 @@ $categories = [
     <div class="col-12">
         <div class="card admin-card">
             <div class="card-header admin-card-header-flex">
-                <h3 class="card-title">All University Events</h3>
+                <h3 class="card-title"><i class="fas fa-calendar-check text-success mr-2"></i> Active Events</h3>
                 <div class="card-tools">
                     <a href="create.php" class="btn btn-sm btn-primary">
                         <i class="fas fa-plus"></i> New Event
@@ -77,7 +86,7 @@ $categories = [
                 <table class="table table-hover admin-table">
                     <thead>
                         <tr>
-                            <th>ID</th>
+                            <th>S.N.</th>
                             <th>Event Title</th>
                             <th>Date</th>
                             <th>Venue</th>
@@ -87,10 +96,10 @@ $categories = [
                         </tr>
                     </thead>
                     <tbody>
-                        <?php if ($result->num_rows > 0): ?>
-                            <?php while($row = $result->fetch_assoc()): ?>
+                        <?php if ($result_active->num_rows > 0): $sn = 1; ?>
+                            <?php while($row = $result_active->fetch_assoc()): ?>
                                 <tr id="event-row-<?= $row['event_id'] ?>">
-                                    <td><?= $row['event_id'] ?></td>
+                                    <td><?= $sn++ ?></td>
                                     <td>
                                         <div class="admin-event-title"><?= htmlspecialchars($row['title']) ?></div>
                                         <small class="badge badge-light"><?= $categories[$row['category_id']] ?? 'Other' ?></small>
@@ -124,7 +133,67 @@ $categories = [
                             <?php endwhile; ?>
                         <?php else: ?>
                             <tr>
-                                <td colspan="7" class="admin-empty-row">No events found.</td>
+                                <td colspan="7" class="admin-empty-row">No active events found.</td>
+                            </tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Past Events Card -->
+        <div class="card admin-card mt-4">
+            <div class="card-header admin-card-header-flex">
+                <h3 class="card-title text-muted"><i class="fas fa-history mr-2"></i> Past Events</h3>
+            </div>
+            <div class="card-body admin-table-wrapper table-responsive">
+                <table class="table table-hover admin-table">
+                    <thead>
+                        <tr>
+                            <th>S.N.</th>
+                            <th>Event Title</th>
+                            <th>Date</th>
+                            <th>Venue</th>
+                            <th>Capacity</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if ($result_past->num_rows > 0): $sn = 1; ?>
+                            <?php while($row = $result_past->fetch_assoc()): ?>
+                                <tr id="event-row-<?= $row['event_id'] ?>">
+                                    <td><?= $sn++ ?></td>
+                                    <td>
+                                        <div class="admin-event-title text-muted"><?= htmlspecialchars($row['title']) ?></div>
+                                        <small class="badge badge-light"><?= $categories[$row['category_id']] ?? 'Other' ?></small>
+                                    </td>
+                                    <td class="text-muted"><?= date('M d, Y', strtotime($row['event_date'])) ?></td>
+                                    <td class="text-muted"><?= htmlspecialchars($row['venue']) ?></td>
+                                    <td class="text-muted"><?= $row['max_participants'] ?></td>
+                                    <td>
+                                        <span class="badge badge-secondary">Ended</span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-xs btn-info edit-event-btn" 
+                                                data-id="<?= $row['event_id'] ?>"
+                                                data-title="<?= htmlspecialchars($row['title']) ?>"
+                                                data-venue="<?= htmlspecialchars($row['venue']) ?>"
+                                                data-date="<?= $row['event_date'] ?>"
+                                                data-capacity="<?= $row['max_participants'] ?>"
+                                                data-category="<?= $row['category_id'] ?>"
+                                                data-description="<?= htmlspecialchars($row['description']) ?>">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-xs btn-danger delete-event-btn" data-id="<?= $row['event_id'] ?>">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            <?php endwhile; ?>
+                        <?php else: ?>
+                            <tr>
+                                <td colspan="7" class="admin-empty-row">No past events found.</td>
                             </tr>
                         <?php endif; ?>
                     </tbody>
