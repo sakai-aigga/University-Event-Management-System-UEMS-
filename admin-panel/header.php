@@ -135,7 +135,7 @@ $active_page = $active_pageInfo['active_page'] ?? null;
                 <div class="user-panel admin-user-panel">
                     <a href="<?= BASE_URL ?>/admin-panel/profile.php" class="admin-user-link">
                         <div class="image">
-                            <img src="<?= BASE_URL ?>/assets/images/profile_p.png" class="sidebar-user-avatar elevation-2" alt="User Image">
+                            <div class="sidebar-user-avatar d-flex align-items-center justify-content-center elevation-2" style="background-color: white; color: #343a40; font-weight: bold; width: 35px; height: 35px; border-radius: 50%; font-size: 18px;">A</div>
                         </div>
                         <div class="admin-user-info">
                             <span class="admin-greeting">Hello,</span>
