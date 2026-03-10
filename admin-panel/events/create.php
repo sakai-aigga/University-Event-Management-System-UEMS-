@@ -52,7 +52,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <i class="fas fa-plus-square"></i> 
                 Administrative Event Creation
             </h2>
-            <p class="admin-create-subtitle">Fill out the form below to launch a new university event. This tool is exclusive to authorized administrators.</p>
+            <p class="admin-create-subtitle">Administrative event creation</p>
         </div>
 
         <div class="card admin-create-card">
