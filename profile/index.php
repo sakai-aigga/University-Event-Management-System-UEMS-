@@ -9,10 +9,10 @@ if (!isset($_SESSION['u_id'])) {
 
 // Fetch complete user data
 $u_id = $_SESSION['u_id'];
-$stmt = $conn->prepare("SELECT name, email, contact FROM users WHERE u_id = ?");
+$stmt = $conn->prepare("SELECT name, email, contact, profile_image FROM users WHERE u_id = ?");
 $stmt->bind_param("i", $u_id);
 $stmt->execute();
-$stmt->bind_result($name, $email, $contact);
+$stmt->bind_result($name, $email, $contact, $profile_image);
 $stmt->fetch();
 $stmt->close();
 ?>
@@ -65,6 +65,31 @@ $stmt->close();
             color: var(--primary-purple);
             border: 5px solid white;
             box-shadow: var(--card-shadow);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        .avatar-edit-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            font-size: 20px;
+            text-align: center;
+            padding: 8px 0;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .profile-avatar:hover .avatar-edit-overlay {
+            opacity: 1;
         }
         .user-details {
             margin-bottom: 40px;
@@ -151,10 +176,19 @@ $stmt->close();
 
     <main class="profile-card-wrapper">
         <div class="profile-card">
-            <div class="profile-avatar">
-                <i class="fas fa-user"></i>
+            <div class="profile-avatar" onclick="document.getElementById('profile-image-input').click();">
+                <?php if (!empty($profile_image)): ?>
+                    <img src="data:image/jpeg;base64,<?= base64_encode($profile_image) ?>" alt="Profile Avatar">
+                <?php else: ?>
+                    <i class="fas fa-user"></i>
+                <?php endif; ?>
+                <div class="avatar-edit-overlay">
+                    <i class="fas fa-camera"></i>
+                </div>
             </div>
-            
+            <form id="profile-image-form" style="display:none;">
+                <input type="file" name="profile_image" id="profile-image-input" accept="image/*">
+            </form>
             <div class="user-details">
                 <div class="detail-item">
                     <label>Full Name</label>
@@ -186,5 +220,33 @@ $stmt->close();
     </main>
 
     <?php include "../includes/footer.php"; ?>
+    <script>
+        document.getElementById('profile-image-input').addEventListener('change', function() {
+            if(this.files && this.files[0]) {
+                const file = this.files[0];
+                const maxSize = 16 * 1024 * 1024; // 16MB
+                if(file.size > maxSize) {
+                    alert("Image size is too large. Maximum supported size is 16MB.");
+                    return;
+                }
+                const formData = new FormData();
+                formData.append('profile_image', file);
+                
+                fetch('upload-image.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.success) {
+                        location.reload();
+                    } else {
+                        alert(data.message || 'Error uploading image.');
+                    }
+                })
+                .catch(err => alert('Error uploading image.'));
+            }
+        });
+    </script>
 </body>
 </html>
