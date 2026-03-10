@@ -32,22 +32,35 @@ $user_id = $_SESSION['u_id'];
 $sql_create = "CREATE TABLE IF NOT EXISTS contact_submissions (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
+    name VARCHAR(255) NULL,
+    email VARCHAR(255) NULL,
+    message TEXT NULL,
+    is_read TINYINT(1) DEFAULT 0,
     submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )";
 $conn->query($sql_create);
 
-// 1. Check for cooldown (e.g., 60 seconds)
+// Attempt to add columns if they don't exist (fails silently if they do)
+@$conn->query("ALTER TABLE contact_submissions ADD COLUMN name VARCHAR(255) AFTER user_id");
+@$conn->query("ALTER TABLE contact_submissions ADD COLUMN email VARCHAR(255) AFTER name");
+@$conn->query("ALTER TABLE contact_submissions ADD COLUMN message TEXT AFTER email");
+@$conn->query("ALTER TABLE contact_submissions ADD COLUMN is_read TINYINT(1) DEFAULT 0 AFTER message");
+
+// 1. Check for cooldown (5 minutes)
+$cooldown_seconds = 300; // 5 minutes
 $cooldown_check = "SELECT MAX(submitted_at) as last_submission FROM contact_submissions WHERE user_id = $user_id";
 $res_cooldown = $conn->query($cooldown_check);
 if ($res_cooldown && $row = $res_cooldown->fetch_assoc()) {
     if ($row['last_submission']) {
         $last_time = strtotime($row['last_submission']);
         $diff = time() - $last_time;
-        if ($diff < 60) {
-            $wait = 60 - $diff;
+        if ($diff < $cooldown_seconds) {
+            $wait_seconds = $cooldown_seconds - $diff;
+            $wait_minutes = ceil($wait_seconds / 60);
+            $unit = $wait_minutes === 1 ? 'minute' : 'minutes';
             echo json_encode([
                 "success" => false,
-                "message" => "Please wait {$wait} seconds before sending another message."
+                "message" => "Please wait {$wait_minutes} {$unit} before sending another message."
             ]);
             exit;
         }
@@ -69,8 +82,16 @@ if ($res_limit && $row = $res_limit->fetch_assoc()) {
 
 // Get POST data
 $name = $_POST['name'] ?? '';
-$email = $_POST['email'] ?? '';
 $message = $_POST['message'] ?? '';
+
+// Fetch email from logged in user since it's hidden from form
+$email = '';
+$stmt_email = $conn->prepare("SELECT email FROM users WHERE u_id = ?");
+$stmt_email->bind_param("i", $user_id);
+$stmt_email->execute();
+$stmt_email->bind_result($email);
+$stmt_email->fetch();
+$stmt_email->close();
 
 // Basic validation
 if (empty($name) || empty($email) || empty($message)) {
@@ -103,9 +124,9 @@ $emailBody = "
 $result = sendMail(RECEIVER_EMAIL, $subject, $emailBody, $email);
 
 if ($result['success']) {
-    // Log the submission
-    $stmt = $conn->prepare("INSERT INTO contact_submissions (user_id) VALUES (?)");
-    $stmt->bind_param("i", $user_id);
+    // Log the submission with actual data
+    $stmt = $conn->prepare("INSERT INTO contact_submissions (user_id, name, email, message, is_read) VALUES (?, ?, ?, ?, 0)");
+    $stmt->bind_param("isss", $user_id, $name, $email, $message);
     $stmt->execute();
 }
 
