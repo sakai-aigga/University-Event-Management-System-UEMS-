@@ -48,22 +48,19 @@ $conn->query($sql_create);
 
 // 1. Check for cooldown (5 minutes)
 $cooldown_seconds = 300; // 5 minutes
-$cooldown_check = "SELECT MAX(submitted_at) as last_submission FROM contact_submissions WHERE user_id = $user_id";
+$cooldown_check = "SELECT TIMESTAMPDIFF(SECOND, MAX(submitted_at), NOW()) as seconds_since
+                   FROM contact_submissions WHERE user_id = $user_id";
 $res_cooldown = $conn->query($cooldown_check);
 if ($res_cooldown && $row = $res_cooldown->fetch_assoc()) {
-    if ($row['last_submission']) {
-        $last_time = strtotime($row['last_submission']);
-        $diff = time() - $last_time;
-        if ($diff < $cooldown_seconds) {
-            $wait_seconds = $cooldown_seconds - $diff;
-            $wait_minutes = ceil($wait_seconds / 60);
-            $unit = $wait_minutes === 1 ? 'minute' : 'minutes';
-            echo json_encode([
-                "success" => false,
-                "message" => "Please wait {$wait_minutes} {$unit} before sending another message."
-            ]);
-            exit;
-        }
+    if ($row['seconds_since'] !== null && (int)$row['seconds_since'] < $cooldown_seconds) {
+        $wait_seconds = $cooldown_seconds - (int)$row['seconds_since'];
+        $wait_minutes = max(1, (int)ceil($wait_seconds / 60));
+        $unit = $wait_minutes === 1 ? 'minute' : 'minutes';
+        echo json_encode([
+            "success" => false,
+            "message" => "Please wait {$wait_minutes} {$unit} before sending another message."
+        ]);
+        exit;
     }
 }
 
