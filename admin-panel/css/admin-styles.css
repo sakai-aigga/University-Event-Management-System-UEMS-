@@ -170,24 +170,8 @@
     pointer-events: none;
 }
 
-.admin-stat-primary h3,
-.admin-stat-primary p,
-.admin-stat-warning h3,
-.admin-stat-warning p {
-    color: #fff !important;
-    z-index: 2;
-    position: relative;
-}
 
-.admin-stat-primary .small-box-footer,
-.admin-stat-warning .small-box-footer {
-    color: rgba(255, 255, 255, 0.9) !important;
-    background: rgba(0, 0, 0, 0.15) !important;
-    backdrop-filter: blur(4px);
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    z-index: 2;
-    position: relative;
-}
+
 
 .admin-stat-icon-dim {
     color: rgba(255, 255, 255, 0.4);
@@ -202,6 +186,47 @@
 .small-box:hover {
     transform: translateY(-5px);
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15) !important;
+}
+
+.admin-stat-notif {
+    background: linear-gradient(135deg, #0ea5e9, #0369a1);
+    color: white !important;
+    box-shadow: 0 8px 32px 0 rgba(14, 165, 233, 0.28) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+}
+
+.admin-stat-notif::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    bottom: -50%;
+    left: -50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 60%);
+    pointer-events: none;
+}
+
+.admin-stat-primary h3,
+.admin-stat-primary p,
+.admin-stat-warning h3,
+.admin-stat-warning p,
+.admin-stat-notif h3,
+.admin-stat-notif p {
+    color: #fff !important;
+    z-index: 2;
+    position: relative;
+}
+
+.admin-stat-primary .small-box-footer,
+.admin-stat-warning .small-box-footer,
+.admin-stat-notif .small-box-footer {
+    color: rgba(255, 255, 255, 0.9) !important;
+    background: rgba(0, 0, 0, 0.15) !important;
+    backdrop-filter: blur(4px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 2;
+    position: relative;
 }
 
 /* ================ CARDS (SHARED) ================ */
