@@ -4,11 +4,33 @@
    Supplements AdminLTE + Bootstrap 5
    =================================================== */
 
+:root {
+    --primary-purple: #7e22ce;
+    --dark-purple: #3b0764;
+    --primary-gradient: linear-gradient(135deg, var(--primary-purple), var(--dark-purple));
+    --pink-accent: #ff007a;
+    --dark-blue: #05014a;
+    --text-dark: #1f2937;
+    --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    --bg-light: #f8f9fa;
+}
+
 /* ===================== LAYOUT ===================== */
 .content-header-bar {
     padding: 0 10px;
-    background-color: #f4f6f9;
+    background: var(--primary-gradient);
     border-bottom: none !important;
+}
+
+.content-wrapper .content {
+    padding-top: 1.5rem;
+}
+
+.content-header-bar .nav-link,
+.content-header-bar .admin-page-title,
+.content-header-bar .breadcrumb-item,
+.content-header-bar .breadcrumb-item a {
+    color: white !important;
 }
 
 .breadcrumb-row {
@@ -31,6 +53,10 @@
 }
 
 /* =================== SIDEBAR ==================== */
+.main-sidebar {
+    background-color: var(--dark-blue) !important;
+}
+
 .admin-brand-logo {
     border-radius: 50%;
     background-color: #fff;
@@ -80,6 +106,11 @@
     margin-top: 0.5rem;
 }
 
+.nav-sidebar .nav-link.active {
+    background-color: var(--pink-accent) !important;
+    color: white !important;
+}
+
 .admin-logout-item {
     margin-top: 1rem;
 }
@@ -102,40 +133,92 @@
 
 /* ================ DASHBOARD STATS =============== */
 .admin-stat-primary {
-    background-color: #007bff;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    background: linear-gradient(135deg, var(--primary-purple), var(--dark-purple));
+    color: white !important;
+    box-shadow: 0 8px 32px 0 rgba(126, 34, 206, 0.25) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+}
+
+.admin-stat-primary::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    bottom: -50%;
+    left: -50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 60%);
+    pointer-events: none;
 }
 
 .admin-stat-warning {
-    background-color: #ffc107;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    background: linear-gradient(135deg, var(--pink-accent), #ff4d4d);
+    color: white !important;
+    box-shadow: 0 8px 32px 0 rgba(255, 0, 122, 0.25) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+}
+
+.admin-stat-warning::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    bottom: -50%;
+    left: -50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 60%);
+    pointer-events: none;
+}
+
+.admin-stat-primary h3,
+.admin-stat-primary p,
+.admin-stat-warning h3,
+.admin-stat-warning p {
+    color: #fff !important;
+    z-index: 2;
+    position: relative;
+}
+
+.admin-stat-primary .small-box-footer,
+.admin-stat-warning .small-box-footer {
+    color: rgba(255, 255, 255, 0.9) !important;
+    background: rgba(0, 0, 0, 0.15) !important;
+    backdrop-filter: blur(4px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 2;
+    position: relative;
 }
 
 .admin-stat-icon-dim {
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(255, 255, 255, 0.4);
 }
 
 .small-box {
-    border-radius: 8px;
-    transition: transform 0.2s;
+    border-radius: 16px;
+    transition: all 0.3s ease;
+    overflow: hidden;
 }
 
 .small-box:hover {
-    transform: translateY(-3px);
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15) !important;
 }
 
 /* ================ CARDS (SHARED) ================ */
 .admin-card {
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     border: none;
+    background-color: #fcfcff;
 }
 
 .admin-card-header {
-    background-color: #fff;
+    background-color: #f8f9fc;
+    border-bottom: 1px solid #eef0f7;
 }
 
 .admin-card-header-flex {
-    background-color: #fff;
+    background-color: #f8f9fc;
+    border-bottom: 1px solid #eef0f7;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -166,7 +249,7 @@
 
 /* ============= MODALS (SHARED) ================== */
 .admin-modal-header-primary {
-    background-color: #007bff;
+    background: var(--primary-gradient);
     color: #fff;
     border-bottom: none;
     padding: 15px 20px;
@@ -235,6 +318,9 @@
     padding-right: 3rem;
     font-weight: 700;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background: var(--primary-gradient) !important;
+    border: none !important;
+    color: white !important;
 }
 
 .admin-btn-submit i {
