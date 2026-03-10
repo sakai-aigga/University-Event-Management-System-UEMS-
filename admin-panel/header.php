@@ -18,14 +18,38 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
 $currentPage = basename($_SERVER['SCRIPT_NAME']);
 $currentDir = basename(dirname($_SERVER['SCRIPT_NAME']));
 
+// Fetch unread notifications
+$unread_count = 0;
+$recent_notifications = [];
+if (isset($conn)) {
+    // Failsafe in case table is completely newly added
+    @$conn->query("ALTER TABLE contact_submissions ADD COLUMN name VARCHAR(255) AFTER user_id");
+    @$conn->query("ALTER TABLE contact_submissions ADD COLUMN email VARCHAR(255) AFTER name");
+    @$conn->query("ALTER TABLE contact_submissions ADD COLUMN message TEXT AFTER email");
+    @$conn->query("ALTER TABLE contact_submissions ADD COLUMN is_read TINYINT(1) DEFAULT 0 AFTER message");
+
+    $notif_sql = "SELECT * FROM contact_submissions WHERE is_read = 0 ORDER BY submitted_at DESC LIMIT 5";
+    $notif_res = @$conn->query($notif_sql);
+    
+    // Get actual unread count
+    $count_sql = @$conn->query("SELECT COUNT(*) FROM contact_submissions WHERE is_read = 0");
+    if ($count_sql) {
+        $unread_count = $count_sql->fetch_row()[0];
+    }
+
+    if ($notif_res) {
+        while($row = $notif_res->fetch_assoc()) {
+            $recent_notifications[] = $row;
+        }
+    }
+}
+
 // Define menu with full paths
 $menuItems = [
     [
         "menuTitle" => "Dashboard",
         "icon" => "fas fa-tachometer-alt",
-        "pages" => [
-            ["title" => "Home", "url" => BASE_URL . "/admin-panel/index.php"]
-        ],
+        "url" => BASE_URL . "/admin-panel/index.php"
     ],
     [
         "menuTitle" => "Events",
@@ -38,33 +62,48 @@ $menuItems = [
     [
         "menuTitle" => "Users",
         "icon" => "fas fa-users",
-        "pages" => [
-            ["title" => "Manage Users", "url" => BASE_URL . "/admin-panel/users/index.php"]
-        ],
+        "url" => BASE_URL . "/admin-panel/users/index.php"
     ],
     [
         "menuTitle" => "Departments",
         "icon" => "fas fa-building",
-        "pages" => [
-            ["title" => "Manage Departments", "url" => BASE_URL . "/admin-panel/departments/index.php"]
-        ],
+        "url" => BASE_URL . "/admin-panel/departments/index.php"
+    ],
+    [
+        "menuTitle" => "Notifications",
+        "icon" => "fas fa-bell",
+        "url" => BASE_URL . "/admin-panel/notifications.php"
     ]
 ];
 
 $active_pageInfo = null;
 foreach ($menuItems as $menuItem) {
-    foreach ($menuItem['pages'] as $page) {
-        if (basename($page['url']) === $currentPage && ($currentDir === 'admin-panel' || strpos($page['url'], "/$currentDir/") !== false)) {
+    if (isset($menuItem['pages'])) {
+        foreach ($menuItem['pages'] as $page) {
+            if (basename($page['url']) === $currentPage && ($currentDir === 'admin-panel' || strpos($page['url'], "/$currentDir/") !== false)) {
+                $active_pageInfo = [
+                    "breadcrumb_Items" => [
+                        ["title" => $menuItem['menuTitle'], "url" => "#"],
+                        ["title" => $page['title'], "url" => $page['url']]
+                    ],
+                    "page_title" => $page['title'],
+                    "active_menu" => $menuItem,
+                    "active_page" => $page
+                ];
+                break 2;
+            }
+        }
+    } else {
+        if (basename($menuItem['url']) === $currentPage && ($currentDir === 'admin-panel' || strpos($menuItem['url'], "/$currentDir/") !== false)) {
             $active_pageInfo = [
                 "breadcrumb_Items" => [
-                    ["title" => $menuItem['menuTitle'], "url" => "#"],
-                    ["title" => $page['title'], "url" => $page['url']]
+                    ["title" => $menuItem['menuTitle'], "url" => $menuItem['url']]
                 ],
-                "page_title" => $page['title'],
+                "page_title" => $menuItem['menuTitle'],
                 "active_menu" => $menuItem,
-                "active_page" => $page
+                "active_page" => null
             ];
-            break 2;
+            break;
         }
     }
 }
@@ -111,14 +150,55 @@ $active_page = $active_pageInfo['active_page'] ?? null;
                     <div class="col-sm-6 col-12 mb-2 mb-sm-0">
                         <h1 class="admin-page-title"><?= $page_title ?></h1>
                     </div>
-                    <div class="col-sm-6 col-12">
-                        <ol class="breadcrumb admin-breadcrumb m-0 float-sm-right float-none">
+                    <div class="col-sm-6 col-12 d-flex justify-content-end align-items-center">
+                        <ol class="breadcrumb admin-breadcrumb m-0 float-none d-inline-flex me-4">
                             <?php foreach ($breadcrumb_Items as $item): ?>
                                 <li class="breadcrumb-item <?= $item['url'] === '#' ? 'active' : '' ?>">
                                     <?= $item['url'] === '#' ? $item['title'] : "<a href='{$item['url']}'>{$item['title']}</a>" ?>
                                 </li>
                             <?php endforeach; ?>
                         </ol>
+
+                        <!-- Notification Bell Dropdown -->
+                        <ul class="navbar-nav">
+                            <li class="nav-item dropdown">
+                                <a class="nav-link" data-bs-toggle="dropdown" href="#" style="position: relative;">
+                                    <i class="far fa-bell" style="font-size: 1.2rem;"></i>
+                                    <?php if ($unread_count > 0): ?>
+                                        <span class="badge rounded-pill bg-danger" style="position: absolute; top: 0; right: -5px; font-size: 0.65rem; border: 2px solid var(--dark-purple);"><?= $unread_count ?></span>
+                                    <?php endif; ?>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end border-0 shadow-lg" style="min-width: 300px; border-radius: 12px; margin-top: 10px;">
+                                    <div class="dropdown-header text-center" style="background: var(--bg-light); border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                                        <strong style="color: var(--text-dark);">
+                                            <?= $unread_count ?> New Notifications
+                                        </strong>
+                                    </div>
+                                    <div class="dropdown-divider m-0"></div>
+                                    
+                                    <?php if (empty($recent_notifications)): ?>
+                                        <a href="#" class="dropdown-item text-center text-muted py-3">
+                                            No recent notifications.
+                                        </a>
+                                    <?php else: ?>
+                                        <?php foreach ($recent_notifications as $notif): ?>
+                                            <a href="<?= BASE_URL ?>/admin-panel/notifications.php" class="dropdown-item py-3" style="white-space: normal; line-height: 1.4;">
+                                                <i class="fas fa-envelope mr-2 text-primary"></i> 
+                                                <strong><?= htmlspecialchars($notif['name'] ?? 'User') ?></strong> left a message: <br>
+                                                <span class="text-muted text-sm d-inline-block mt-1" style="max-height: 40px; overflow: hidden; text-overflow: ellipsis;">
+                                                    <?= htmlspecialchars(substr($notif['message'] ?? '', 0, 50)) ?>...
+                                                </span>
+                                            </a>
+                                            <div class="dropdown-divider m-0"></div>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+
+                                    <a href="<?= BASE_URL ?>/admin-panel/notifications.php" class="dropdown-item dropdown-footer text-center" style="background: var(--bg-light); border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+                                        See All Inquiries
+                                    </a>
+                                </div>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -146,15 +226,15 @@ $active_page = $active_pageInfo['active_page'] ?? null;
                 <nav class="admin-sidebar-nav">
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
                         <?php foreach ($menuItems as $menuItem): ?>
-                            <li class="nav-item has-treeview <?= $menuItem === $active_menu ? 'menu-open' : '' ?>">
-                                <a class="nav-link <?= $menuItem === $active_menu ? 'active' : '' ?>" href="#">
-                                    <i class="nav-icon <?= $menuItem['icon'] ?>"></i>
-                                    <p>
-                                        <?= $menuItem['menuTitle'] ?>
-                                        <?= !empty($menuItem['pages']) ? '<i class="right fas fa-angle-left"></i>' : '' ?>
-                                    </p>
-                                </a>
-                                <?php if (!empty($menuItem['pages'])): ?>
+                            <?php if (isset($menuItem['pages'])): ?>
+                                <li class="nav-item has-treeview <?= $menuItem === $active_menu ? 'menu-open' : '' ?>">
+                                    <a class="nav-link <?= $menuItem === $active_menu ? 'active' : '' ?>" href="#">
+                                        <i class="nav-icon <?= $menuItem['icon'] ?>"></i>
+                                        <p>
+                                            <?= $menuItem['menuTitle'] ?>
+                                            <i class="right fas fa-angle-left"></i>
+                                        </p>
+                                    </a>
                                     <ul class="nav nav-treeview">
                                         <?php foreach ($menuItem['pages'] as $page): ?>
                                             <li class="nav-item">
@@ -166,8 +246,15 @@ $active_page = $active_pageInfo['active_page'] ?? null;
                                             </li>
                                         <?php endforeach; ?>
                                     </ul>
-                                <?php endif; ?>
-                            </li>
+                                </li>
+                            <?php else: ?>
+                                <li class="nav-item">
+                                    <a href="<?= $menuItem['url'] ?>" class="nav-link <?= $menuItem === $active_menu ? 'active' : '' ?>">
+                                        <i class="nav-icon <?= $menuItem['icon'] ?>"></i>
+                                        <p><?= $menuItem['menuTitle'] ?></p>
+                                    </a>
+                                </li>
+                            <?php endif; ?>
                         <?php endforeach; ?>
                         <li class="nav-item admin-logout-item">
                             <a href="<?= BASE_URL ?>/profile/logout.php" class="nav-link admin-logout-link">
