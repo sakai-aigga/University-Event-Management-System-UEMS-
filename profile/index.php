@@ -91,6 +91,17 @@ $stmt->close();
         .profile-avatar:hover .avatar-edit-overlay {
             opacity: 1;
         }
+        .btn-remove-avatar {
+            font-size: 13px;
+            color: #ef4444;
+            cursor: pointer;
+            text-decoration: underline;
+            background: none;
+            border: none;
+            display: block;
+            margin: -20px auto 30px;
+            font-weight: 500;
+        }
         .user-details {
             margin-bottom: 40px;
             display: grid;
@@ -189,6 +200,9 @@ $stmt->close();
             <form id="profile-image-form" style="display:none;">
                 <input type="file" name="profile_image" id="profile-image-input" accept="image/*">
             </form>
+            <?php if (!empty($profile_image)): ?>
+                <button class="btn-remove-avatar" onclick="removeProfileImage()">Remove Image</button>
+            <?php endif; ?>
             <div class="user-details">
                 <div class="detail-item">
                     <label>Full Name</label>
@@ -247,6 +261,21 @@ $stmt->close();
                 .catch(err => alert('Error uploading image.'));
             }
         });
+
+        function removeProfileImage() {
+            if(confirm("Are you sure you want to remove your profile picture?")) {
+                fetch('remove-image.php', { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.success) {
+                        location.reload();
+                    } else {
+                        alert(data.message || 'Error removing image.');
+                    }
+                })
+                .catch(err => alert('Error removing image.'));
+            }
+        }
     </script>
 </body>
 </html>
