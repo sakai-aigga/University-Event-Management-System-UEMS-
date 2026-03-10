@@ -100,14 +100,19 @@ $active_page = $active_pageInfo['active_page'] ?? null;
     <div class="wrapper">
 
 
-        <div class="main-header content-header-bar">
-            <div class="content-header">
-                <div class="row breadcrumb-row">
-                    <div class="col-sm-6">
+        <nav class="main-header navbar navbar-expand navbar-white navbar-light content-header-bar d-flex align-items-center">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+                </li>
+            </ul>
+            <div class="content-header w-100 ps-2">
+                <div class="row breadcrumb-row align-items-center m-0">
+                    <div class="col-sm-6 col-12 mb-2 mb-sm-0">
                         <h1 class="admin-page-title"><?= $page_title ?></h1>
                     </div>
-                    <div class="col-sm-6">
-                        <ol class="breadcrumb admin-breadcrumb">
+                    <div class="col-sm-6 col-12">
+                        <ol class="breadcrumb admin-breadcrumb m-0 float-sm-right float-none">
                             <?php foreach ($breadcrumb_Items as $item): ?>
                                 <li class="breadcrumb-item <?= $item['url'] === '#' ? 'active' : '' ?>">
                                     <?= $item['url'] === '#' ? $item['title'] : "<a href='{$item['url']}'>{$item['title']}</a>" ?>
@@ -117,7 +122,7 @@ $active_page = $active_pageInfo['active_page'] ?? null;
                     </div>
                 </div>
             </div>
-        </div>
+        </nav>
 
         <aside class="main-sidebar sidebar-dark-primary elevation-4">
             <a href="<?= BASE_URL ?>/admin-panel/" class="brand-link">
