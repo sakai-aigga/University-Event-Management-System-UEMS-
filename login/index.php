@@ -9,11 +9,7 @@ if (isset($_SESSION['role'])) {
     }
     exit();
 }
-
-
 ?>
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>

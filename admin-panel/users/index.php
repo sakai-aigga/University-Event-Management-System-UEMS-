@@ -42,7 +42,7 @@ $result = $conn->query($sql);
                 <table class="table table-hover admin-table">
                     <thead>
                         <tr>
-                            <th>ID</th>
+                            <th>S.N.</th>
                             <th>Full Name</th>
                             <th>Email</th>
                             <th>Contact</th>
@@ -51,10 +51,10 @@ $result = $conn->query($sql);
                         </tr>
                     </thead>
                     <tbody>
-                        <?php if ($result->num_rows > 0): ?>
+                        <?php if ($result->num_rows > 0): $sn = 1; ?>
                             <?php while($row = $result->fetch_assoc()): ?>
                                 <tr>
-                                    <td><?= $row['u_id'] ?></td>
+                                    <td><?= $sn++ ?></td>
                                     <td class="admin-cell-bold"><?= htmlspecialchars($row['name'] ?: 'N/A') ?></td>
                                     <td><?= htmlspecialchars($row['email']) ?></td>
                                     <td><?= htmlspecialchars($row['contact'] ?: '-') ?></td>

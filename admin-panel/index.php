@@ -79,7 +79,7 @@ if ($notif_list) {
                             <div style="flex:1; min-width:0;">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
                                     <strong style="color:var(--text-dark);"><?= htmlspecialchars($notif['name'] ?: 'Unknown User') ?></strong>
-                                    <small class="text-muted ml-2" style="white-space:nowrap;"><?= date('M d, g:i A', strtotime($notif['submitted_at'])) ?></small>
+                                    <small class="text-muted ml-2" style="white-space:nowrap;"><?= date('d/m/Y g:i A', strtotime($notif['submitted_at'])) ?></small>
                                 </div>
                                 <p class="mb-0 text-muted" style="font-size:0.9rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
                                     <?= htmlspecialchars(substr($notif['message'] ?? '', 0, 100)) ?>
