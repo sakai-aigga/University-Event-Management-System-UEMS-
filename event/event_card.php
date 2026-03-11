@@ -14,10 +14,30 @@ $is_past = strtotime($row['event_date']) < strtotime(date('Y-m-d'));
 $max_cap = isset($row['max_participants']) ? (int)$row['max_participants'] : 0;
 $current_part = isset($row['current_participants']) ? (int)$row['current_participants'] : 0;
 $is_full = ($max_cap > 0 && $current_part >= $max_cap);
+
+// Handle event image - use database image or dynamic royalty-free fallback
+if (!empty($row['event_image'])) {
+    $img = $row['event_image'];
+    if (strpos($img, 'data:image') === 0 || strpos($img, 'http') === 0) {
+        $event_image = htmlspecialchars($img);
+    } else {
+        $event_image = 'data:image/jpeg;base64,' . base64_encode($img);
+    }
+} else {
+    // Dynamic royalty-free image based on title and category
+    $search_terms = urlencode($row['title'] . ' ' . $cat_name . ' university');
+    $event_image = "https://source.unsplash.com/featured/800x600/?{$search_terms}";
+}
+$fallback_img = "https://source.unsplash.com/featured/800x600/?university,campus";
 ?>
 
 <div class="event-card" onclick="showEventDetails(<?php echo $row['event_id']; ?>)">
-    <span class="free-badge"><?php echo htmlspecialchars($cat_name); ?></span>
+    <span class="free-badge">
+        <?php echo htmlspecialchars($cat_name); ?>
+        <?php if(!empty($row['dept_acronym'])): ?>
+            | <?php echo htmlspecialchars($row['dept_acronym']); ?>
+        <?php endif; ?>
+    </span>
     
     <?php if ($is_registered): ?>
         <span class="registered-badge"><i class="fas fa-check-circle"></i> Registered</span>
@@ -25,10 +45,10 @@ $is_full = ($max_cap > 0 && $current_part >= $max_cap);
         <span class="registered-badge" style="background: #6c757d;"><i class="fas fa-users-slash"></i> Full</span>
     <?php endif; ?>
 
-    <img src="https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&q=80&w=500" class="event-img" alt="<?php echo htmlspecialchars($row['title']); ?>">
+    <img src="<?php echo $event_image; ?>" class="event-img" alt="<?php echo htmlspecialchars($row['title']); ?>" onerror="this.src='https://media.gettyimages.com/id/158997850/vector/presenter.jpg?s=612x612&w=0&k=20&c=btE_wy6IQof6ZSDufIg_nElo7CiRV8-Ja5lNPUiecYo=';">
     
     <div class="event-content">
-        <p class="date-tag"><?php echo date('M d, Y', strtotime($row['event_date'])); ?></p>
+        <p class="date-tag"><?php echo date('d/m/Y', strtotime($row['event_date'])); ?></p>
         <h3 class="event-title"><?php echo htmlspecialchars($row['title']); ?></h3>
         <p class="event-location">📍 <?php echo htmlspecialchars($row['venue']); ?></p>
         
