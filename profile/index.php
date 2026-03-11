@@ -175,6 +175,107 @@ $stmt->close();
                 flex-direction: column;
             }
         }
+
+        /* ====== GUI Alert / Confirm Modals ====== */
+        .gui-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(6px);
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+        .gui-modal-overlay.show {
+            display: flex;
+            opacity: 1;
+        }
+        .gui-modal-box {
+            background: #fff;
+            border-radius: 22px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.2);
+            overflow: hidden;
+            transform: translateY(20px) scale(0.97);
+            transition: transform 0.25s ease;
+        }
+        .gui-modal-overlay.show .gui-modal-box {
+            transform: translateY(0) scale(1);
+        }
+        .gui-modal-header {
+            background: var(--primary-gradient);
+            padding: 22px 24px 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .gui-modal-header .modal-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #fff;
+            flex-shrink: 0;
+        }
+        .gui-modal-header h3 {
+            margin: 0;
+            font-size: 17px;
+            font-weight: 700;
+            color: #fff;
+        }
+        .gui-modal-body {
+            padding: 24px 28px 10px;
+            color: #374151;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+        .gui-modal-footer {
+            padding: 16px 28px 24px;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+        .gui-btn {
+            padding: 10px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            transition: 0.25s;
+        }
+        .gui-btn-cancel {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        .gui-btn-cancel:hover {
+            background: #e5e7eb;
+        }
+        .gui-btn-danger {
+            background: linear-gradient(135deg, #ef4444, #b91c1c);
+            color: #fff;
+        }
+        .gui-btn-danger:hover {
+            filter: brightness(1.1);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(239,68,68,0.35);
+        }
+        .gui-btn-ok {
+            background: var(--primary-gradient);
+            color: #fff;
+        }
+        .gui-btn-ok:hover {
+            filter: brightness(1.1);
+            transform: translateY(-1px);
+        }
     </style>
 </head>
 <body>
@@ -234,18 +335,85 @@ $stmt->close();
     </main>
 
     <?php include "../includes/footer.php"; ?>
+
+    <!-- GUI Confirm Modal (Remove Image) -->
+    <div class="gui-modal-overlay" id="confirmRemoveModal">
+        <div class="gui-modal-box">
+            <div class="gui-modal-header">
+                <div class="modal-icon"><i class="fas fa-trash-alt"></i></div>
+                <h3>Remove Profile Picture</h3>
+            </div>
+            <div class="gui-modal-body">
+                Are you sure you want to remove your profile picture? This action cannot be undone.
+            </div>
+            <div class="gui-modal-footer">
+                <button class="gui-btn gui-btn-cancel" onclick="closeGuiModal('confirmRemoveModal')">Cancel</button>
+                <button class="gui-btn gui-btn-danger" id="confirmRemoveBtn">Yes, Remove</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- GUI Alert Modal (Info / Error) -->
+    <div class="gui-modal-overlay" id="alertModal">
+        <div class="gui-modal-box">
+            <div class="gui-modal-header" id="alertModalHeader">
+                <div class="modal-icon" id="alertModalIcon"><i class="fas fa-info-circle"></i></div>
+                <h3 id="alertModalTitle">Notice</h3>
+            </div>
+            <div class="gui-modal-body" id="alertModalBody"></div>
+            <div class="gui-modal-footer">
+                <button class="gui-btn gui-btn-ok" onclick="closeGuiModal('alertModal')">OK</button>
+            </div>
+        </div>
+    </div>
     <script>
+        /* ===== GUI Modal Helpers ===== */
+        function openGuiModal(id) {
+            const el = document.getElementById(id);
+            el.style.display = 'flex';
+            requestAnimationFrame(() => el.classList.add('show'));
+        }
+        function closeGuiModal(id) {
+            const el = document.getElementById(id);
+            el.classList.remove('show');
+            setTimeout(() => { el.style.display = 'none'; }, 250);
+        }
+        function showGuiAlert(message, type = 'info') {
+            const header = document.getElementById('alertModalHeader');
+            const icon   = document.getElementById('alertModalIcon');
+            const title  = document.getElementById('alertModalTitle');
+            document.getElementById('alertModalBody').textContent = message;
+            if (type === 'error') {
+                header.style.background = 'linear-gradient(135deg, #ef4444, #b91c1c)';
+                icon.innerHTML  = '<i class="fas fa-exclamation-circle"></i>';
+                title.textContent = 'Error';
+            } else {
+                header.style.background = '';
+                icon.innerHTML  = '<i class="fas fa-info-circle"></i>';
+                title.textContent = 'Notice';
+            }
+            openGuiModal('alertModal');
+        }
+
+        /* Close modals on overlay click */
+        document.querySelectorAll('.gui-modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', function(e) {
+                if (e.target === this) closeGuiModal(this.id);
+            });
+        });
+
+        /* ===== Upload image ===== */
         document.getElementById('profile-image-input').addEventListener('change', function() {
             if(this.files && this.files[0]) {
                 const file = this.files[0];
                 const maxSize = 16 * 1024 * 1024; // 16MB
                 if(file.size > maxSize) {
-                    alert("Image size is too large. Maximum supported size is 16MB.");
+                    showGuiAlert('Image size is too large. Maximum supported size is 16 MB.', 'error');
                     return;
                 }
                 const formData = new FormData();
                 formData.append('profile_image', file);
-                
+
                 fetch('upload-image.php', {
                     method: 'POST',
                     body: formData
@@ -255,27 +423,31 @@ $stmt->close();
                     if(data.success) {
                         location.reload();
                     } else {
-                        alert(data.message || 'Error uploading image.');
+                        showGuiAlert(data.message || 'Error uploading image.', 'error');
                     }
                 })
-                .catch(err => alert('Error uploading image.'));
+                .catch(() => showGuiAlert('Error uploading image.', 'error'));
             }
         });
 
+        /* ===== Remove image (confirm modal) ===== */
         function removeProfileImage() {
-            if(confirm("Are you sure you want to remove your profile picture?")) {
-                fetch('remove-image.php', { method: 'POST' })
-                .then(res => res.json())
-                .then(data => {
-                    if(data.success) {
-                        location.reload();
-                    } else {
-                        alert(data.message || 'Error removing image.');
-                    }
-                })
-                .catch(err => alert('Error removing image.'));
-            }
+            openGuiModal('confirmRemoveModal');
         }
+
+        document.getElementById('confirmRemoveBtn').addEventListener('click', function() {
+            closeGuiModal('confirmRemoveModal');
+            fetch('remove-image.php', { method: 'POST' })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    location.reload();
+                } else {
+                    showGuiAlert(data.message || 'Error removing image.', 'error');
+                }
+            })
+            .catch(() => showGuiAlert('Error removing image.', 'error'));
+        });
     </script>
 </body>
 </html>
