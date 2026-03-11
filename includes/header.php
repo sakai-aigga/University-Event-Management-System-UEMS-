@@ -6,6 +6,10 @@ $isLoggedIn = isset($_SESSION['u_id']);
 include_once __DIR__ . '/path-config.php';
 ?>
 
+<!-- Global Scripts & Styles -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <header>
     <div class="logo-area">
     <a href="<?= BASE_URL ?>/index.php" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: white;">
@@ -40,8 +44,9 @@ include_once __DIR__ . '/path-config.php';
                     $p_image_html = '<span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background-color:white;color:#6a11cb;flex-shrink:0;margin-right:6px;vertical-align:middle;font-size:12px;"><i class="fas fa-user"></i></span>';
                 }
             }
+            $firstName = explode(' ', trim($_SESSION['name'] ?? 'User'))[0];
             ?>
-            <a href="<?= BASE_URL ?>/profile/" style="display:flex;align-items:center;gap:0;"><?= $p_image_html ?><?= htmlspecialchars($_SESSION['name']); ?></a>
+            <a href="<?= BASE_URL ?>/profile/" style="display:flex;align-items:center;gap:0;"><?= $p_image_html ?><?= htmlspecialchars($firstName); ?></a>
             <?php else: ?>
             <a href="<?= BASE_URL ?>/login/" class="head-btn-login">Login</a>
         <?php endif; ?>
