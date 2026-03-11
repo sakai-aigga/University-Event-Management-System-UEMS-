@@ -19,9 +19,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES["profile_image"])) {
     }
 
     if ($file['error'] === UPLOAD_ERR_OK) {
-        $maxSize = 16 * 1024 * 1024; // 16MB for medium blob
+        $maxSize = 2 * 1024 * 1024; // 2MB
         if ($file['size'] > $maxSize) {
-            echo json_encode(['success' => false, 'message' => 'File size exceeds 16MB limit.']);
+            echo json_encode(['success' => false, 'message' => 'Image file cannot be more than 2MB. Please compress or resize your image and try again.']);
             exit;
         }
 
@@ -42,7 +42,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES["profile_image"])) {
         if ($stmt->execute()) {
             echo json_encode(['success' => true]);
         } else {
-            echo json_encode(['success' => false, 'message' => 'Database update failed.']);
+            echo json_encode(['success' => false, 'message' => 'Image file cannot be more than 2MB. Please use a smaller image.']);
         }
         $stmt->close();
     } else {
