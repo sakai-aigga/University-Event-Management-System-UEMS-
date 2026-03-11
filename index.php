@@ -4,6 +4,19 @@ require_once 'includes/db-config.php';
 $isLoggedIn = isset($_SESSION['u_id']);
 $hostEventUrl = $isLoggedIn ? 'uems/contact.php' : 'login/';
 
+// Fetch Departments for filtering
+$dept_list = [];
+$d_res = $conn->query("SELECT * FROM departments ORDER BY dept_name ASC");
+if ($d_res) while($r = $d_res->fetch_assoc()) $dept_list[] = $r;
+
+// Filtering Logic
+$f_dept = isset($_GET['dept_id']) ? (int)$_GET['dept_id'] : null;
+$f_cat  = isset($_GET['category_id']) ? (int)$_GET['category_id'] : null;
+
+$filter_query = "";
+if ($f_dept) $filter_query .= " AND e.dept_id = $f_dept";
+if ($f_cat)  $filter_query .= " AND e.category_id = $f_cat";
+
 // Fetch Upcoming Events with registration and count check
 $u_id = isset($_SESSION['u_id']) ? $_SESSION['u_id'] : 0;
 $upcoming_sql = "SELECT e.*, 
@@ -11,7 +24,7 @@ $upcoming_sql = "SELECT e.*,
                  (SELECT COUNT(*) FROM registration r2 WHERE r2.event_id = e.event_id) as current_participants
                  FROM event e 
                  LEFT JOIN registration r_check ON e.event_id = r_check.event_id AND r_check.u_id = $u_id
-                 WHERE e.is_published = 1 AND e.event_date >= CURDATE() 
+                 WHERE e.is_published = 1 AND e.event_date >= CURDATE() $filter_query
                  ORDER BY e.event_date ASC";
 $upcoming_result = $conn->query($upcoming_sql);
 
@@ -21,7 +34,7 @@ $past_sql = "SELECT e.*,
              (SELECT COUNT(*) FROM registration r2 WHERE r2.event_id = e.event_id) as current_participants
              FROM event e 
              LEFT JOIN registration r_check ON e.event_id = r_check.event_id AND r_check.u_id = $u_id
-             WHERE e.is_published = 1 AND e.event_date < CURDATE() 
+             WHERE e.is_published = 1 AND e.event_date < CURDATE() $filter_query
              ORDER BY e.event_date DESC";
 $past_result = $conn->query($past_sql);
 
@@ -45,6 +58,27 @@ $cat_map = [1=>'Academic', 2=>'Workshop', 3=>'Sports', 4=>'Cultural'];
             <div class="section-header">
                 <h2>Featured Events</h2>
                 <div class="filters">
+                    <form method="GET" style="display: flex; gap: 10px; align-items: center;">
+                        <div class="select-wrapper">
+                            <select name="dept_id" onchange="this.form.submit()" class="filter-select">
+                                <option value="">All Departments</option>
+                                <?php foreach ($dept_list as $d): ?>
+                                    <option value="<?= $d['dept_id'] ?>" <?= $f_dept == $d['dept_id'] ? 'selected' : '' ?>><?= htmlspecialchars($d['dept_name']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="select-wrapper">
+                            <select name="category_id" onchange="this.form.submit()" class="filter-select">
+                                <option value="">All Categories</option>
+                                <?php foreach ($cat_map as $id => $name): ?>
+                                    <option value="<?= $id ?>" <?= $f_cat == $id ? 'selected' : '' ?>><?= $name ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <?php if($f_dept || $f_cat): ?>
+                            <a href="index.php" class="filter-clear">Clear <i class="fas fa-times"></i></a>
+                        <?php endif; ?>
+                    </form>
                 </div>
             </div>
             <div class="events-grid">
@@ -64,7 +98,7 @@ $cat_map = [1=>'Academic', 2=>'Workshop', 3=>'Sports', 4=>'Cultural'];
                     <h3>Want to Host Your Loving Event?</h3>
                     <p>Contact us Now and Register your event and reach thousands of students.</p>
                 </div>
-                <a href="<?= htmlspecialchars($hostEventUrl) ?>" class="btn-pink" style="text-decoration: none; display: inline-block; color: white;">Host An Event</a>
+                <a href="<?= htmlspecialchars($hostEventUrl) ?>" class="btn-pink">Host An Event</a>
             </div>
         </section>
 
@@ -86,6 +120,32 @@ $cat_map = [1=>'Academic', 2=>'Workshop', 3=>'Sports', 4=>'Cultural'];
     <style>
         ul{
             list-style-type: none;
+        }
+        .filter-select {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            background: white;
+            font-size: 14px;
+            color: #444;
+            cursor: pointer;
+            outline: none;
+            transition: 0.3s;
+        }
+        .filter-select:hover, .filter-select:focus {
+            border-color: var(--pink-accent);
+        }
+        .filter-clear {
+            font-size: 14px;
+            color: #666;
+            text-decoration: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+        .filter-clear:hover {
+            background: rgba(0,0,0,0.05);
+            color: var(--pink-accent);
         }
     </style>
     <?php include "./includes/footer.php"; ?>
