@@ -4,56 +4,69 @@ A web-based University Event Management System that lets users register, log in,
 
 ## 📌 Project Summary
 
-UEMS is a simple event management application built with PHP, JavaScript, CSS and designed for university use. It provides:
+UEMS is a streamlined event management application built with PHP, JavaScript, and CSS, specifically designed for university ecosystems. It provides a centralized platform for:
 
-- User registration & login
-- Event listing
-- Profile management
-- Simple UI for event handling
-
+* **User Authentication:** Secure registration and login for students.
+* **Event Discovery:** Dynamic listing of upcoming university activities.
+* **Profile Management:** Personalized dashboards for managing user information.
+* **Administrative Control:** Dedicated panel for event handling and updates.
 
 ## 🧩 Technologies Used
 
-- **Backend:** PHP  
-- **Frontend:** HTML, CSS, JavaScript  
-- **Data Storage:** MySQL 
-- **Assets & Includes:** CSS, images, reusable components
+| Layer | Technology |
+| --- | --- |
+| **Backend** | PHP |
+| **Frontend** | HTML, CSS, JavaScript |
+| **Database** | MySQL |
+| **Server** | Apache (XAMPP/WAMP) |
 
 ## 🗂️ Project Structure
-```
+
+```text
 /
 ├── admin-panel/      # Admin side dashboard and features
 ├── api/              # Server endpoints (PHP)
 ├── assets/           # Stylesheets & images
-├── includes/         # Database Connection
+├── includes/         # Database Connection & core logic
 ├── login/            # Login page logic
 ├── profile/          # User profile page
 ├── register/         # Registration logic
 ├── index.php         # Main landing page
-├── uems/             # About and Contact page
-└── README.md
+├── uems/             # About and Contact pages
+└── README.md         # Project documentation
+
 ```
-## 🚀 Installation
 
-1. Clone the project:
-   ```bash
-   git clone https://github.com/sakai-aigga/University-Event-Management-System-UEMS-.git
-   ```
-2. Move into project folder:
-    ```bash
-    cd University-Event-Management-System-UEMS-
-    ```
-3. Create a database
+## 🚀 Installation & Setup
 
-4. Update database config in your PHP files
+1. **Clone the project:**
+```bash
+git clone https://github.com/sakai-aigga/University-Event-Management-System-UEMS-.git
 
-5. Serve on a local server (e.g., XAMPP, WAMP)
+```
 
-6. Place the project inside htdocs (for XAMPP)
 
-7. Start Apache and MySQL
+2. **Move into project folder:**
+```bash
+cd University-Event-Management-System-UEMS-
 
-8. Visit: 
-    ```bash
-    http://localhost/University-Event-Management-System-UEMS-/
-    ```
+```
+
+
+3. **Database Setup:**
+* Open **phpMyAdmin** (`http://localhost/phpmyadmin`).
+* Create a new database (e.g., `uems`).
+* Import your `.sql` file into the new database.
+
+
+4. **Configuration:**
+* Update the database connection settings in the `includes/` folder to match your local credentials (DB Name, Username, Password).
+
+
+5. **Deployment:**
+* Place the project folder inside your local server's root directory (e.g., `htdocs` for XAMPP).
+* Start **Apache** and **MySQL** from your control panel.
+
+
+6. **Access the App:**
+* Visit: `http://localhost/University-Event-Management-System-UEMS-/`
