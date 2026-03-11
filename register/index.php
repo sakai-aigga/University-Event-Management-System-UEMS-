@@ -69,7 +69,7 @@ session_start();
             </div>
         </div>
     </section>
-    <script src="..\assets\js\script.js"></script>
+    <script src="../assets/js/script.js"></script>
     <?php include "../includes/footer.php"; ?>
 </body>
 </html>

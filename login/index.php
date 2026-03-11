@@ -45,6 +45,7 @@ if (isset($_SESSION['role'])) {
                         <label>Password</label>
                         <div class="input-wrapper pass-container">
                             <input type="password" name="password" placeholder="Enter your password" required>
+                            <span class="show-toggle togglePassword">Show</span>
                         </div>
                     </div>
                     

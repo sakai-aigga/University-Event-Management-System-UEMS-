@@ -57,8 +57,9 @@
                         </div>
                         <div class="form-group">
                             <label>Password</label>
-                            <div class="input-wrapper">
+                            <div class="input-wrapper pass-container">
                                 <input type="password" name="password" placeholder="Enter password" required>
+                                <span class="show-toggle togglePassword">Show</span>
                             </div>
                         </div>
                     <?php else: ?>
@@ -225,4 +226,16 @@
     window.onclick = e => {
         if (e.target == document.getElementById('eventDetailModal')) closeModal();
     };
+
+    // Password Toggle for the Registration (Login) form
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('togglePassword')) {
+            const container = e.target.parentElement;
+            const input = container.querySelector('input');
+            if (input) {
+                input.type = input.type === 'password' ? 'text' : 'password';
+                e.target.textContent = input.type === 'password' ? 'Show' : 'Hide';
+            }
+        }
+    });
 </script>

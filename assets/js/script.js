@@ -24,7 +24,7 @@ document.getElementById('loginForm')?.addEventListener('submit', async function 
 });
 
 // Handle register form submission
-document.getElementById('registerForm').addEventListener('submit', async function(e) {
+document.getElementById('registerForm')?.addEventListener('submit', async function(e) {
     e.preventDefault(); // Prevent normal form submit
 
     // Clear previous errors
