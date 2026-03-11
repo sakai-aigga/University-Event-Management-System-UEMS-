@@ -147,32 +147,48 @@ $stmt->close();
         .btn-edit {
             background: var(--primary-gradient);
             color: white;
+            border: none;
         }
         .btn-password {
-            background: white;
+            background: rgba(126, 34, 206, 0.05);
             color: var(--primary-purple);
             border: 2px solid var(--primary-purple);
         }
+        .btn-delete-acc {
+            background: rgba(239, 68, 68, 0.05);
+            color: #ef4444;
+            border: 2px solid #ef4444;
+        }
+
         .action-btn:hover {
             transform: translateY(-3px);
             box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
+
         .btn-logout-alt {
-            margin-top: 20px;
-            display: inline-block;
+            margin-top: 25px;
+            padding: 12px 30px;
+            background: #fdf2f2;
             color: #ef4444;
             text-decoration: none;
             font-weight: 600;
             font-size: 14px;
+            border-radius: 50px;
             transition: 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid rgba(239, 68, 68, 0.1);
         }
         .btn-logout-alt:hover {
-            opacity: 0.8;
-            text-decoration: underline;
+            background: #fee2e2;
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(239, 68, 68, 0.1);
         }
-        @media (max-width: 600px) {
+        @media (max-width: 768px) {
             .profile-actions {
                 flex-direction: column;
+                gap: 15px;
             }
         }
 
@@ -324,7 +340,10 @@ $stmt->close();
                     <i class="fas fa-user-edit"></i> Edit Profile
                 </a>
                 <a href="change-password.php" class="action-btn btn-password">
-                    <i class="fas fa-key"></i> Change Password
+                    <i class="fas fa-key"></i> Passwords
+                </a>
+                <a href="javascript:void(0)" onclick="confirmDeleteAccount()" class="action-btn btn-delete-acc">
+                    <i class="fas fa-user-slash"></i> Delete Account
                 </a>
             </div>
 
@@ -353,19 +372,24 @@ $stmt->close();
         </div>
     </div>
 
-    <!-- GUI Alert Modal (Info / Error) -->
-    <div class="gui-modal-overlay" id="alertModal">
+    <!-- GUI Confirm Modal (Delete Account) -->
+    <div class="gui-modal-overlay" id="confirmDeleteModal">
         <div class="gui-modal-box">
-            <div class="gui-modal-header" id="alertModalHeader">
-                <div class="modal-icon" id="alertModalIcon"><i class="fas fa-info-circle"></i></div>
-                <h3 id="alertModalTitle">Notice</h3>
+            <div class="gui-modal-header" style="background: linear-gradient(135deg, #ef4444, #b91c1c);">
+                <div class="modal-icon" style="background: rgba(255,255,255,0.2);"><i class="fas fa-user-slash"></i></div>
+                <h3>Delete Your Account?</h3>
             </div>
-            <div class="gui-modal-body" id="alertModalBody"></div>
+            <div class="gui-modal-body">
+                We're sorry to see you go. This action will permanently remove all your data and event history. This cannot be undone.
+            </div>
             <div class="gui-modal-footer">
-                <button class="gui-btn gui-btn-ok" onclick="closeGuiModal('alertModal')">OK</button>
+                <button class="gui-btn gui-btn-cancel" onclick="closeGuiModal('confirmDeleteModal')">Don't delete</button>
+                <button class="gui-btn gui-btn-danger" id="confirmDeleteAccBtn">Permanently Delete</button>
             </div>
         </div>
     </div>
+
+    <!-- GUI Alert Modal (Info / Error) -->
     <script>
         /* ===== GUI Modal Helpers ===== */
         function openGuiModal(id) {
@@ -447,6 +471,28 @@ $stmt->close();
                 }
             })
             .catch(() => showGuiAlert('Error removing image.', 'error'));
+        });
+
+        /* ===== Delete Account ===== */
+        function confirmDeleteAccount() {
+            openGuiModal('confirmDeleteModal');
+        }
+
+        document.getElementById('confirmDeleteAccBtn').addEventListener('click', function() {
+            closeGuiModal('confirmDeleteModal');
+            fetch('delete-account.php', { method: 'POST' })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    showGuiAlert("Your account has been permanently deleted. Redirecting you to the dashboard...", "success");
+                    setTimeout(() => {
+                        window.location.href = '../index.php';
+                    }, 2000);
+                } else {
+                    showGuiAlert(data.message || 'Error deleting account.', 'error');
+                }
+            })
+            .catch(() => showGuiAlert('Error deleting account.', 'error'));
         });
     </script>
 </body>
