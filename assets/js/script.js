@@ -42,8 +42,15 @@ document.getElementById('registerForm')?.addEventListener('submit', async functi
         const result = await response.json();
 
         if (result.success) {
-            alert(result.message); // Optional: show success message
-            window.location.href = '../login/'; // Redirect to login
+            Swal.fire({
+                icon: 'success',
+                title: 'Registration Successful!',
+                text: result.message,
+                timer: 2000,
+                showConfirmButton: false
+            }).then(() => {
+                window.location.href = '../login/';
+            });
         } else {
             document.getElementById('errorMessage').textContent = result.message;
         }
