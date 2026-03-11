@@ -9,7 +9,17 @@
             <div id="regMessage" class="message" style="display: none; margin-bottom: 15px;"></div>
             
             <div id="mainModalContent">
-                <img src="" id="modalImg" class="detail-modal-img" alt="Event">
+                <style>
+                    .detail-modal-img { transition: all 0.3s ease; cursor: zoom-in !important; }
+                    .detail-modal-img.expanded { 
+                        height: auto !important; 
+                        max-height: 70vh !important; 
+                        object-fit: contain !important; 
+                        cursor: zoom-out !important;
+                        background: #000;
+                    }
+                </style>
+                <img src="" id="modalImg" class="detail-modal-img" alt="Event" onclick="this.classList.toggle('expanded')" title="Click to view full image">
                 <div class="detail-modal-info-grid">
                     <div class="detail-info-item">
                         <i class="fas fa-calendar-alt"></i>
@@ -87,12 +97,17 @@
                 if (data.success) {
                     const event = data.event;
                     document.getElementById('modalTitle').innerText = event.title;
-                    document.getElementById('modalDate').innerText = new Date(event.event_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    document.getElementById('modalDate').innerText = new Date(event.event_date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
                     document.getElementById('modalVenue').innerText = event.venue;
-                    document.getElementById('modalCategory').innerText = event.category_name || 'General';
+                    const deptInfo = event.dept_name ? `Hosted by: ${event.dept_name}` : 'General Event';
+                    document.getElementById('modalCategory').innerText = `${event.category_name || 'General'} | ${deptInfo}`;
                     document.getElementById('modalCap').innerText = (event.max_participants || 'N/A') + ' Max';
                     document.getElementById('modalDesc').innerText = event.description || 'No description available.';
-                    document.getElementById('modalImg').src = 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&q=80&w=600';
+                    
+                    // Use the image provided by the API (either BLOB data or dynamic fallback)
+                    let imgSrc = event.event_image || 'https://source.unsplash.com/featured/800x600/?university';
+                    document.getElementById('modalImg').src = imgSrc;
+                    
                     document.getElementById('regEventId').value = event.event_id;
                     
                     const regBtn = document.getElementById('modalRegLink');
@@ -121,6 +136,9 @@
                     }
                     
                     modal.classList.add('show');
+                    // Prevent layout shifting by compensating for scrollbar width
+                    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+                    document.body.style.paddingRight = `${scrollbarWidth}px`;
                     document.body.style.overflow = 'hidden';
                 }
             });
@@ -201,6 +219,7 @@
     function closeModal() {
         document.getElementById('eventDetailModal').classList.remove('show');
         document.body.style.overflow = 'auto';
+        document.body.style.paddingRight = '0';
     }
 
     window.onclick = e => {
