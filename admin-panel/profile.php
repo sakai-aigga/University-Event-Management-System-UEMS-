@@ -86,9 +86,10 @@ $pass_locked = ($password_updated_at && (time() - strtotime($password_updated_at
                 <!-- Avatar Section -->
                 <div class="admin-profile-avatar-section">
                     <div class="admin-profile-avatar-wrapper">
-                        <img class="profile-user-img img-fluid img-circle admin-profile-avatar-img" 
-                             src="<?= BASE_URL ?>/assets/images/profile_p.png" 
-                             alt="Admin profile picture">
+                        <div class="profile-user-img img-circle admin-profile-avatar-img d-flex align-items-center justify-content-center" 
+                             style="background-color: white; color: #343a40; font-weight: bold; font-size: 60px; border: 3px solid #dee2e6;">
+                            A
+                        </div>
                         <span class="admin-profile-online-dot" title="Online"></span>
                     </div>
                     <h3 class="admin-profile-name"><?= htmlspecialchars($name) ?></h3>
