@@ -8,7 +8,8 @@ if (isset($_GET['id'])) {
     
     // Attempt to fetch event. We'll handle the category name separately to be safe.
     // JOIN with departments table to get full details
-    $sql = "SELECT e.*, d.dept_name, d.acronym as dept_acronym 
+    $sql = "SELECT e.*, d.dept_name, d.acronym as dept_acronym,
+            (SELECT COUNT(*) FROM registration r WHERE r.event_id = e.event_id) as current_participants
             FROM event e 
             LEFT JOIN departments d ON e.dept_id = d.dept_id 
             WHERE e.event_id = ?";

@@ -81,7 +81,7 @@
                     </div>
                     <div class="detail-info-item">
                         <i class="fas fa-users"></i>
-                        <span id="modalCap">Capacity</span>
+                        <span id="modalCap">Available Seats</span>
                     </div>
                 </div>
                 <div class="detail-modal-description">
@@ -177,7 +177,8 @@
                     document.getElementById('modalVenue').innerText = event.venue;
                     const deptInfo = event.dept_name ? `Hosted by: ${event.dept_name}` : 'General Event';
                     document.getElementById('modalCategory').innerText = `${event.category_name || 'General'} | ${deptInfo}`;
-                    document.getElementById('modalCap').innerText = (event.max_participants || 'N/A') + ' Max';
+                    const availableSeats = (event.max_participants || 0) - (event.current_participants || 0);
+                    document.getElementById('modalCap').innerText = (availableSeats > 0 ? availableSeats : 0) + ' Seats Available';
                     document.getElementById('modalDesc').innerText = event.description || 'No description available.';
                     
                     // Use the image provided by the API (either BLOB data or dynamic fallback)
@@ -202,13 +203,28 @@
                         regBtn.style.opacity = '0.7';
                         regBtn.style.background = '#6c757d';
                         unregBtn.style.display = 'inline-block';
+                    } else if (event.max_participants > 0 && event.current_participants >= event.max_participants) {
+                        regBtn.style.display = 'inline-block';
+                        regBtn.innerText = 'Fully Booked';
+                        regBtn.disabled = true;
+                        regBtn.style.opacity = '0.7';
+                        regBtn.style.background = '#e5e7eb';
+                        regBtn.style.color = '#6b7280';
+                        regBtn.style.cursor = 'not-allowed';
+                        unregBtn.style.display = 'none';
                     } else {
                         regBtn.style.display = 'inline-block';
                         regBtn.innerText = 'Register For Event';
                         regBtn.disabled = false;
                         regBtn.style.opacity = '1';
                         regBtn.style.background = 'var(--pink-accent)';
+                        regBtn.style.color = 'white';
+                        regBtn.style.cursor = 'pointer';
                         unregBtn.style.display = 'none';
+                    }
+                    
+                    if (startWithRegForm && event.max_participants > 0 && event.current_participants >= event.max_participants) {
+                        toggleRegForm(false);
                     }
                     
                     modal.classList.add('show');

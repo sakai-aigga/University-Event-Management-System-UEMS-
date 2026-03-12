@@ -42,7 +42,7 @@ session_start();
                     <div class="form-group">
                         <label>Contact</label>
                         <div class="input-wrapper">
-                            <input type="text" name="contact" placeholder="Enter contact number" required>
+                            <input type="text" name="contact" placeholder="Enter contact number" required pattern="[9][6-8][0-9]{8}" title="Please enter a valid 10-digit mobile number starting with 9.">
                         </div>
                     </div>
 

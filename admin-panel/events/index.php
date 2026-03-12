@@ -589,7 +589,7 @@ if (!$result_past) die("Past Query Failed: " . $conn->error);
                                 <th>S.N.</th>
                                 <th>User</th>
                                 <th>Email/Contact</th>
-                                <th>Dept/Role</th>
+                                <th>Role</th>
                                 <th>Reg. Date</th>
                             </tr>
                         </thead>
@@ -774,8 +774,7 @@ $(document).ready(function() {
                                             <small class="text-muted"><i class="fas fa-phone-alt mr-1"></i>${p.contact}</small>
                                         </td>
                                         <td>
-                                            <div><span class="badge badge-outline-info">${p.dept}</span></div>
-                                            <small class="badge badge-pill badge-light">${p.role}</small>
+                                            <span class="badge badge-pill badge-light">${p.role}</span>
                                         </td>
                                         <td>${p.reg_date}</td>
                                     </tr>
