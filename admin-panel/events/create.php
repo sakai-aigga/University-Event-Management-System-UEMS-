@@ -1,15 +1,53 @@
 <?php
-// Securely include navigation and session handling
-include '../../includes/db-config.php';
-include '../header.php';
+ob_start();
+require_once '../../includes/db-config.php';
 
-// Fetch Departments for dropdown
-$depts_result = $conn->query("SELECT * FROM departments ORDER BY dept_name ASC");
-$departments = [];
-if ($depts_result) {
-    while ($row = $depts_result->fetch_assoc()) {
-        $departments[] = $row;
+// Session management (normally in header.php, but needed here for AJAX)
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Security Check (same as header.php)
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+    if (isset($_POST['ajax'])) {
+        echo json_encode(['success' => false, 'message' => 'Unauthorized access.']);
+        exit;
     }
+    header("Location: ../../index.php");
+    exit();
+}
+
+// Helper function to compress and resize images
+function compressEventImage($source_path, $quality = 60, $max_width = 1200) {
+    if (!extension_loaded('gd')) return file_get_contents($source_path);
+    $info = getimagesize($source_path);
+    if (!$info) return file_get_contents($source_path);
+    $type = $info[2];
+    switch ($type) {
+        case IMAGETYPE_JPEG: $image = imagecreatefromjpeg($source_path); break;
+        case IMAGETYPE_PNG:  $image = imagecreatefrompng($source_path); break;
+        case IMAGETYPE_GIF:  $image = imagecreatefromgif($source_path); break;
+        case IMAGETYPE_WEBP: $image = imagecreatefromwebp($source_path); break;
+        default: return file_get_contents($source_path);
+    }
+    $width = imagesx($image);
+    $height = imagesy($image);
+    if ($width > $max_width) {
+        $new_width = $max_width;
+        $new_height = floor($height * ($max_width / $width));
+        $tmp_img = imagecreatetruecolor($new_width, $new_height);
+        if ($type == IMAGETYPE_PNG || $type == IMAGETYPE_WEBP) {
+            imagealphablending($tmp_img, false);
+            imagesavealpha($tmp_img, true);
+        }
+        imagecopyresampled($tmp_img, $image, 0, 0, 0, 0, $new_width, $new_height, $width, $height);
+        $image = $tmp_img;
+    }
+    ob_start();
+    imagejpeg($image, NULL, $quality);
+    $compressed_data = ob_get_clean();
+    imagedestroy($image);
+    return $compressed_data;
 }
 
 $message = "";
@@ -17,9 +55,18 @@ $msg_type = "";
 
 // Handle Form Submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $is_ajax = isset($_POST['ajax']) && $_POST['ajax'] == '1';
+    
     // Sanitize inputs
-    $title            = $_POST['title'];
-    $description      = $_POST['description'];
+    $title            = $_POST['title'] ?? '';
+    $description      = $_POST['description'] ?? '';
+    if (!isset($_SESSION['u_id'])) {
+        if ($is_ajax) {
+            ob_clean(); echo json_encode(['success' => false, 'message' => 'Session expired. Please login again.']); exit;
+        }
+        header("Location: ../../login/index.php");
+        exit;
+    }
     $u_id             = $_SESSION['u_id'];
     $category_id      = (int)$_POST['category_id'];
     $dept_id          = !empty($_POST['dept_id']) ? (int)$_POST['dept_id'] : null;
@@ -31,29 +78,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Handle Image Upload
     if (!empty($_FILES['image_file']['name'])) {
-        // Handle file upload
-        $file_name = $_FILES['image_file']['name'];
         $file_tmp = $_FILES['image_file']['tmp_name'];
         $file_size = $_FILES['image_file']['size'];
         $file_type = $_FILES['image_file']['type'];
         
-        // Validate file
         $allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-        $max_size = 5 * 1024 * 1024; // 5MB
+        $max_size = 16 * 1024 * 1024; // 16MB
         
         if (!in_array($file_type, $allowed_types)) {
             $message = "Invalid file type. Please upload a JPG, PNG, GIF, or WebP image.";
             $msg_type = "error";
         } elseif ($file_size > $max_size) {
-            $message = "File size exceeds 5MB limit.";
+            $message = "File size exceeds 16MB limit.";
             $msg_type = "error";
         } else {
-            // Read file content for BLOB storage
-            $img_data = file_get_contents($file_tmp);
+            $img_data = compressEventImage($file_tmp);
             if ($img_data !== false) {
                 $event_image = $img_data;
-                $message = "";
-                $msg_type = "";
             } else {
                 $message = "Failed to process image file.";
                 $msg_type = "error";
@@ -61,33 +102,57 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    // Server-side validation
     if (empty($title) || empty($event_date) || empty($venue)) {
         $message  = "Please fill in all required fields.";
         $msg_type = "warning";
     } elseif ($msg_type !== "error") {
-        // Database Insertion using send_long_data for BLOB safety
         $sql = "INSERT INTO event (u_id, title, description, category_id, dept_id, is_published, max_participants, event_date, venue, event_image) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
         $stmt = $conn->prepare($sql);
-        $null = NULL; // Prepared statement requires a variable for null/blob placeholder
+        $null = NULL;
         $stmt->bind_param("issiiiissb", $u_id, $title, $description, $category_id, $dept_id, $is_published, $max_participants, $event_date, $venue, $null);
         
         if (!empty($event_image)) {
-            $stmt->send_long_data(9, $event_image); // 9 is the index of event_image (0-indexed)
+            $stmt->send_long_data(9, $event_image);
         }
 
         if ($stmt->execute()) {
+            if ($is_ajax) {
+                ob_clean();
+                echo json_encode(['success' => true, 'message' => "The event '<strong>" . htmlspecialchars($title) . "</strong>' has been officially launched!", 'title' => $title]);
+                exit;
+            }
             $message  = "New Event '<strong>" . htmlspecialchars($title) . "</strong>' has been created successfully!";
             $msg_type = "success";
         } else {
-            $message  = "System Error: Unable to create event. " . $stmt->error;
+            $err = $stmt->error;
+            $msg = (strpos($err, 'max_allowed_packet') !== false) ? "Image too complex for DB." : "Unable to create event: " . $err;
+            if ($is_ajax) {
+                ob_clean(); echo json_encode(['success' => false, 'message' => $msg]); exit;
+            }
+            $message = $msg;
             $msg_type = "error";
         }
         $stmt->close();
+    } else {
+        if ($is_ajax) {
+            ob_clean(); echo json_encode(['success' => false, 'message' => $message]); exit;
+        }
     }
 }
+
+include '../header.php';
+
+// Fetch Departments for dropdown
+$depts_result = $conn->query("SELECT * FROM departments ORDER BY dept_name ASC");
+$departments = [];
+if ($depts_result) {
+    while ($row = $depts_result->fetch_assoc()) {
+        $departments[] = $row;
+    }
+}
+
 ?>
 
 <!-- Main Content Section -->
@@ -141,7 +206,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 <div class="image-upload-content-simple">
                                     <div class="custom-file-upload">
                                         <input type="file" class="form-control-file" id="image_file" name="image_file" accept="image/jpeg,image/png,image/gif,image/webp">
-                                        <small class="admin-help-text">Supported formats: JPG, PNG, GIF, WebP. Max size: 5MB</small>
+                                        <small class="admin-help-text">Supported formats: JPG, PNG, GIF, WebP. Max size: 16MB</small>
                                     </div>
                                 </div>
                             </div>
@@ -222,19 +287,33 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <!-- Confirmation and Alert Integration -->
 <script>
     $(document).ready(function() {
-        // Initialize Flatpickr for DD/MM/YYYY date formatting
+        // Initialize Flatpickr with enhanced configuration
         flatpickr(".date-picker", {
-            dateFormat: "Y-m-d",        // backend format
-            altInput: true,             // show formatted string instead
-            altFormat: "d/m/Y",         // visual format requested
-            minDate: "today",           // no past events
-            allowInput: true
+            dateFormat: "Y-m-d",
+            altInput: true,
+            altFormat: "F j, Y", // More readable format: March 12, 2026
+            minDate: "today",
+            allowInput: true,
+            animate: true,
+            monthSelectorType: "static",
+            "static": true, // Better positioning inside modals or cards
+            locale: {
+                firstDayOfWeek: 1
+            },
+            onOpen: function(selectedDates, dateStr, instance) {
+                instance.calendarContainer.classList.add('animate__animated', 'animate__fadeIn');
+            }
         });
 
         // Image preview functionality
         $('#image_file').on('change', function() {
             const file = this.files[0];
             if (file) {
+                if (file.size > 16 * 1024 * 1024) {
+                    Swal.fire('Error', 'File size exceeds 16MB limit.', 'error');
+                    $(this).val('');
+                    return;
+                }
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     $('#imagePreview').html(`<img src="${e.target.result}" alt="Preview" style="max-width: 100%; max-height: 300px; border-radius: 8px;"><button type="button" class="remove-image-btn" id="removeImageBtn" title="Remove Image"><i class="fas fa-times"></i></button>`);
@@ -259,27 +338,64 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }, 10);
         });
 
-        // Handle Form Submission with Confirmation
+        // Handle Form Submission with Confirmation and AJAX
         $('#createEventForm').on('submit', function(e) {
             e.preventDefault();
             const form = this;
+            const formData = new FormData(form);
+            formData.append('ajax', '1');
 
             Swal.fire({
                 title: 'Launch this Event?',
-                text: "Are you sure you want to publish this event to the platform? It will be immediately visible to students.",
+                text: "Are you sure you want to publish this event? It will be immediately visible to the public.",
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#007bff',
                 cancelButtonColor: '#6c757d',
                 confirmButtonText: 'Yes, Launch Now!',
-                cancelButtonText: 'Review Details',
-                background: '#fff',
-                customClass: {
-                    popup: 'animate__animated animate__fadeInDown'
-                }
+                cancelButtonText: 'Cancel'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    form.submit(); // Actually submit the form
+                    // Show Loading
+                    Swal.fire({
+                        title: 'Launching Event...',
+                        html: 'Preparing your event for the community.',
+                        allowOutsideClick: false,
+                        didOpen: () => { Swal.showLoading(); }
+                    });
+
+                    $.ajax({
+                        url: '',
+                        method: 'POST',
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function(response) {
+                            try {
+                                const res = typeof response === 'string' ? JSON.parse(response) : response;
+                                if (res.success) {
+                                    // Standard Success Popup
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Success!',
+                                        html: res.message,
+                                        confirmButtonText: 'OK',
+                                        confirmButtonColor: '#28a745'
+                                    }).then(() => {
+                                        window.location.href = 'index.php';
+                                    });
+                                } else {
+                                    Swal.fire('Launch Failed', res.message, 'error');
+                                }
+                            } catch(e) {
+                                console.error(e, response);
+                                Swal.fire('Error', 'Invalid response from server.', 'error');
+                            }
+                        },
+                        error: function() {
+                            Swal.fire('Connection Error', 'Failed to reach the server. Please try again.', 'error');
+                        }
+                    });
                 }
             });
         });
@@ -288,19 +404,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <?php if ($message): ?>
             Swal.fire({
                 icon: '<?= $msg_type ?>',
-                title: '<?= $msg_type === "success" ? "Event Published!" : ($msg_type === "warning" ? "Notice" : "Execution Error") ?>',
+                title: '<?= $msg_type === "success" ? "Success!" : "Notice" ?>',
                 html: '<?= $message ?>',
-                confirmButtonColor: '#007bff',
-                background: '#fff',
-                showClass: {
-                    popup: 'animate__animated animate__fadeInDown'
-                },
-                hideClass: {
-                    popup: 'animate__animated animate__fadeOutUp'
-                }
+                confirmButtonColor: '#007bff'
             }).then((result) => {
                 if ('<?= $msg_type ?>' === 'success') {
-                    window.location.href = 'index.php'; // Redirect admins to events list
+                    window.location.href = 'index.php';
                 }
             });
         <?php endif; ?>

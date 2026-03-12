@@ -18,6 +18,52 @@
                         cursor: zoom-out !important;
                         background: #000;
                     }
+                    /* Auth Choice Styling */
+                    .auth-choice-container { text-align: center; }
+                    .auth-choice-title { margin-bottom: 12px; color: var(--primary-purple); font-weight: 600; }
+                    .auth-choice-text { margin-bottom: 25px; color: #666; font-size: 14.5px; }
+                    .auth-btns-stack { display: flex; flex-direction: column; gap: 14px; max-width: 380px; margin: 0 auto; padding: 0 5px; }
+                    .btn-auth-choice {
+                        text-decoration: none;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 12px;
+                        height: 52px;
+                        border-radius: 14px;
+                        font-weight: 600;
+                        font-size: 16px;
+                        cursor: pointer;
+                        border: none;
+                        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                        width: 100%;
+                    }
+                    .btn-choice-signup { background: var(--pink-accent); color: white; }
+                    .btn-choice-signup:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(255, 0, 122, 0.3); filter: brightness(1.05); }
+                    .btn-choice-login { background: #4f46e5; color: white; }
+                    .btn-choice-login:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(79, 70, 229, 0.3); filter: brightness(1.05); }
+                    .btn-choice-cancel { background: transparent; border: 1.5px solid #e5e7eb; color: #6b7280; font-size: 14px; margin-top: 5px; height: 48px; }
+                    .btn-choice-cancel:hover { background: #f9fafb; color: #374151; border-color: #d1d5db; }
+                    
+                    /* Registration Form Tweaks */
+                    .reg-form-back-btn {
+                        width: 100%;
+                        margin-top: 18px;
+                        border: 1.5px solid #e5e7eb;
+                        height: 48px;
+                        border-radius: 14px;
+                        background: #fff;
+                        color: #6b7280;
+                        font-weight: 600;
+                        cursor: pointer;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 8px;
+                        transition: all 0.2s;
+                    }
+                    .reg-form-back-btn:hover { background: #f9fafb; border-color: #d1d5db; color: #374151; }
+                    .actual-reg-title { margin-bottom: 20px; color: var(--primary-purple); font-weight: 600; }
                 </style>
                 <img src="" id="modalImg" class="detail-modal-img" alt="Event" onclick="this.classList.toggle('expanded')" title="Click to view full image">
                 <div class="detail-modal-info-grid">
@@ -44,30 +90,59 @@
             </div>
 
             <div id="registrationFormContainer" style="display: none; padding: 20px 0;">
-                <h3 style="margin-bottom: 15px; color: var(--primary-purple);">Complete Registration</h3>
-                <form id="ajaxRegForm">
-                    <input type="hidden" name="event_id" id="regEventId">
-                    <?php if (!isset($_SESSION['u_id'])): ?>
-                        <p style="margin-bottom: 20px; font-size: 14px; color: #666;">Please login to register for this event:</p>
-                        <div class="form-group">
-                            <label>Email Address</label>
-                            <div class="input-wrapper">
-                                <input type="email" name="email" placeholder="Enter email" required>
-                            </div>
+                <?php if (!isset($_SESSION['u_id'])): ?>
+                    <!-- Auth Choice Selection -->
+                    <div id="authChoiceSection" class="auth-choice-container">
+                        <h3 class="auth-choice-title">Registration Required</h3>
+                        <p class="auth-choice-text">You must be logged in to register for events. Please choose an option below:</p>
+                        <div class="auth-btns-stack">
+                            <?php 
+                                $isEventSub = (strpos($_SERVER['REQUEST_URI'], '/event/') !== false);
+                                $regPath = $isEventSub ? '../register/' : 'register/';
+                            ?>
+                            <a href="<?php echo $regPath; ?>" class="btn-auth-choice btn-choice-signup">
+                                <i class="fas fa-user-plus"></i> Sign Up / Create Account
+                            </a>
+                            <button type="button" class="btn-auth-choice btn-choice-login" onclick="showPopupLoginForm()">
+                                <i class="fas fa-sign-in-alt"></i> Already Registered? Login
+                            </button>
+                            <button type="button" class="btn-auth-choice btn-choice-cancel" onclick="toggleRegForm(false)">
+                                Not Now, Maybe Later
+                            </button>
                         </div>
-                        <div class="form-group">
-                            <label>Password</label>
-                            <div class="input-wrapper pass-container">
-                                <input type="password" name="password" placeholder="Enter password" required>
-                                <span class="show-toggle togglePassword">Show</span>
+                    </div>
+                <?php endif; ?>
+
+                <div id="actualRegistrationForm" style="<?php echo !isset($_SESSION['u_id']) ? 'display: none;' : ''; ?>">
+                    <h3 class="actual-reg-title">
+                        <?php echo isset($_SESSION['u_id']) ? 'Complete Registration' : 'Login to Register'; ?>
+                    </h3>
+                    <form id="ajaxRegForm">
+                        <input type="hidden" name="event_id" id="regEventId">
+                        <?php if (!isset($_SESSION['u_id'])): ?>
+                            <p style="margin-bottom: 20px; font-size: 14px; color: #666;">Enter your credentials to continue with registration:</p>
+                            <div class="form-group">
+                                <label>Email Address</label>
+                                <div class="input-wrapper">
+                                    <input type="email" name="email" placeholder="Enter email" required>
+                                </div>
                             </div>
-                        </div>
-                    <?php else: ?>
-                        <p style="margin-bottom: 20px;">Registering as <strong><?php echo htmlspecialchars($_SESSION['name']); ?></strong></p>
-                    <?php endif; ?>
-                    <button type="submit" id="submitRegBtn" class="btn-pink" style="width: 100%;">Confirm Registration</button>
-                    <button type="button" onclick="toggleRegForm(false)" class="btn-detail-modal-close" style="width: 100%; margin-top: 10px; border: 1px solid #ddd;">Cancel</button>
-                </form>
+                            <div class="form-group">
+                                <label>Password</label>
+                                <div class="input-wrapper pass-container">
+                                    <input type="password" name="password" placeholder="Enter password" required>
+                                    <span class="show-toggle togglePassword">Show</span>
+                                </div>
+                            </div>
+                        <?php else: ?>
+                            <p style="margin-bottom: 20px;">Registering as <strong><?php echo htmlspecialchars($_SESSION['name']); ?></strong></p>
+                        <?php endif; ?>
+                        <button type="submit" id="submitRegBtn" class="btn-pink" style="width: 100%; height: 50px; border-radius: 14px; font-weight: 600;">Confirm Registration</button>
+                        <button type="button" onclick="<?php echo !isset($_SESSION['u_id']) ? 'showAuthChoice()' : 'toggleRegForm(false)'; ?>" class="reg-form-back-btn">
+                            <i class="fas fa-arrow-left"></i> <?php echo !isset($_SESSION['u_id']) ? 'Back to Options' : 'Cancel'; ?>
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
         <div class="detail-modal-footer" id="modalFooterActions" style="display: flex; justify-content: flex-end; gap: 10px; align-items: center;">
@@ -106,7 +181,7 @@
                     document.getElementById('modalDesc').innerText = event.description || 'No description available.';
                     
                     // Use the image provided by the API (either BLOB data or dynamic fallback)
-                    let imgSrc = event.event_image || 'https://source.unsplash.com/featured/800x600/?university';
+                    let imgSrc = event.event_image || 'https://images.unsplash.com/photo-1541339907198-e08756ebafe3?q=80&w=1000&auto=format&fit=crop';
                     document.getElementById('modalImg').src = imgSrc;
                     
                     document.getElementById('regEventId').value = event.event_id;
@@ -149,6 +224,34 @@
         document.getElementById('mainModalContent').style.display = show ? 'none' : 'block';
         document.getElementById('registrationFormContainer').style.display = show ? 'block' : 'none';
         document.getElementById('modalFooterActions').style.display = show ? 'none' : 'flex';
+        
+        // Reset to choice view if showing registration container and user is not logged in
+        if (show) {
+            const choice = document.getElementById('authChoiceSection');
+            const form = document.getElementById('actualRegistrationForm');
+            if (choice && form) {
+                choice.style.display = 'block';
+                form.style.display = 'none';
+            }
+        }
+    }
+
+    function showPopupLoginForm() {
+        const choice = document.getElementById('authChoiceSection');
+        const form = document.getElementById('actualRegistrationForm');
+        if (choice && form) {
+            choice.style.display = 'none';
+            form.style.display = 'block';
+        }
+    }
+
+    function showAuthChoice() {
+        const choice = document.getElementById('authChoiceSection');
+        const form = document.getElementById('actualRegistrationForm');
+        if (choice && form) {
+            choice.style.display = 'block';
+            form.style.display = 'none';
+        }
     }
 
     function unregisterEvent() {

@@ -15,7 +15,7 @@ $max_cap = isset($row['max_participants']) ? (int)$row['max_participants'] : 0;
 $current_part = isset($row['current_participants']) ? (int)$row['current_participants'] : 0;
 $is_full = ($max_cap > 0 && $current_part >= $max_cap);
 
-// Handle event image - use database image or dynamic royalty-free fallback
+// Handle event image - use database image or curated category-based fallback
 if (!empty($row['event_image'])) {
     $img = $row['event_image'];
     if (strpos($img, 'data:image') === 0 || strpos($img, 'http') === 0) {
@@ -24,11 +24,16 @@ if (!empty($row['event_image'])) {
         $event_image = 'data:image/jpeg;base64,' . base64_encode($img);
     }
 } else {
-    // Dynamic royalty-free image based on title and category
-    $search_terms = urlencode($row['title'] . ' ' . $cat_name . ' university');
-    $event_image = "https://source.unsplash.com/featured/800x600/?{$search_terms}";
+    // Curated high-quality placeholder images for different event types
+    $placeholders = [
+        1 => 'https://images.unsplash.com/photo-1523050853063-bd8012fbb2a0?q=80&w=1000&auto=format&fit=crop', // Academic
+        2 => 'https://images.unsplash.com/photo-1540575861501-7c93b177ef96?q=80&w=1000&auto=format&fit=crop', // Workshop
+        3 => 'https://images.unsplash.com/photo-1461896756186-009f97c72c9c?q=80&w=1000&auto=format&fit=crop', // Sports
+        4 => 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=1000&auto=format&fit=crop', // Cultural
+    ];
+    $event_image = isset($placeholders[$row['category_id']]) ? $placeholders[$row['category_id']] : 'https://images.unsplash.com/photo-1541339907198-e08756ebafe3?q=80&w=1000&auto=format&fit=crop';
 }
-$fallback_img = "https://source.unsplash.com/featured/800x600/?university,campus";
+$fallback_img = "https://images.unsplash.com/photo-1541339907198-e08756ebafe3?q=80&w=1000&auto=format&fit=crop";
 ?>
 
 <div class="event-card" onclick="showEventDetails(<?php echo $row['event_id']; ?>)">

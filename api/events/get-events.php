@@ -24,15 +24,20 @@ if (isset($_GET['id'])) {
         $cat_map = [1=>'Academic', 2=>'Workshop', 3=>'Sports', 4=>'Cultural'];
         $event['category_name'] = isset($cat_map[$event['category_id']]) ? $cat_map[$event['category_id']] : 'General';
 
-        // Handle image with dynamic fallback
+        // Handle image with curated category-based fallback
         if (!empty($event['event_image'])) {
             $img = $event['event_image'];
             if (strpos($img, 'data:image') !== 0 && strpos($img, 'http') !== 0) {
                 $event['event_image'] = 'data:image/jpeg;base64,' . base64_encode($img);
             }
         } else {
-            $terms = urlencode($event['title'] . ' ' . $event['category_name'] . ' university');
-            $event['event_image'] = "https://source.unsplash.com/featured/1200x800/?{$terms}";
+            $placeholders = [
+                1 => 'https://images.unsplash.com/photo-1523050853063-bd8012fbb2a0?q=80&w=1000&auto=format&fit=crop', // Academic
+                2 => 'https://images.unsplash.com/photo-1540575861501-7c93b177ef96?q=80&w=1000&auto=format&fit=crop', // Workshop
+                3 => 'https://images.unsplash.com/photo-1461896756186-009f97c72c9c?q=80&w=1000&auto=format&fit=crop', // Sports
+                4 => 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=1000&auto=format&fit=crop', // Cultural
+            ];
+            $event['event_image'] = isset($placeholders[$event['category_id']]) ? $placeholders[$event['category_id']] : 'https://images.unsplash.com/photo-1541339907198-e08756ebafe3?q=80&w=1000&auto=format&fit=crop';
         }
         
         session_start();
@@ -74,8 +79,13 @@ if (isset($_GET['id'])) {
                     $row['event_image'] = 'data:image/jpeg;base64,' . base64_encode($img);
                 }
             } else {
-                $terms = urlencode($row['title'] . ' university');
-                $row['event_image'] = "https://source.unsplash.com/featured/800x600/?{$terms}";
+                $placeholders = [
+                    1 => 'https://images.unsplash.com/photo-1523050853063-bd8012fbb2a0?q=80&w=1000&auto=format&fit=crop', // Academic
+                    2 => 'https://images.unsplash.com/photo-1540575861501-7c93b177ef96?q=80&w=1000&auto=format&fit=crop', // Workshop
+                    3 => 'https://images.unsplash.com/photo-1461896756186-009f97c72c9c?q=80&w=1000&auto=format&fit=crop', // Sports
+                    4 => 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=1000&auto=format&fit=crop', // Cultural
+                ];
+                $row['event_image'] = isset($placeholders[$row['category_id']]) ? $placeholders[$row['category_id']] : 'https://images.unsplash.com/photo-1541339907198-e08756ebafe3?q=80&w=1000&auto=format&fit=crop';
             }
             $events[] = $row;
         }

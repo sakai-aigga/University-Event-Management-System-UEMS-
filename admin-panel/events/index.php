@@ -2,6 +2,44 @@
 ob_start();
 require_once '../../includes/db-config.php';
 
+// Helper function to compress and resize images to prevent database packet errors
+function compressEventImage($source_path, $quality = 60, $max_width = 1200) {
+    if (!extension_loaded('gd')) return file_get_contents($source_path);
+    
+    $info = getimagesize($source_path);
+    if (!$info) return file_get_contents($source_path);
+
+    $type = $info[2];
+    switch ($type) {
+        case IMAGETYPE_JPEG: $image = imagecreatefromjpeg($source_path); break;
+        case IMAGETYPE_PNG:  $image = imagecreatefrompng($source_path); break;
+        case IMAGETYPE_GIF:  $image = imagecreatefromgif($source_path); break;
+        case IMAGETYPE_WEBP: $image = imagecreatefromwebp($source_path); break;
+        default: return file_get_contents($source_path);
+    }
+
+    // Resize if too wide
+    $width = imagesx($image);
+    $height = imagesy($image);
+    if ($width > $max_width) {
+        $new_width = $max_width;
+        $new_height = floor($height * ($max_width / $width));
+        $tmp_img = imagecreatetruecolor($new_width, $new_height);
+        if ($type == IMAGETYPE_PNG || $type == IMAGETYPE_WEBP) {
+            imagealphablending($tmp_img, false);
+            imagesavealpha($tmp_img, true);
+        }
+        imagecopyresampled($tmp_img, $image, 0, 0, 0, 0, $new_width, $new_height, $width, $height);
+        $image = $tmp_img;
+    }
+
+    ob_start();
+    imagejpeg($image, NULL, $quality); // Convert to JPG and compress
+    $compressed_data = ob_get_clean();
+    imagedestroy($image);
+    return $compressed_data;
+}
+
 // Handle AJAX Requests (Delete/Update) - MUST BE AT TOP
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     $response = ['success' => false, 'message' => 'Invalid action'];
@@ -18,6 +56,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         ob_clean();
         header('Content-Type: application/json');
         echo json_encode($response);
+        exit;
+    }
+
+    if ($_POST['action'] === 'fetch_participants' && isset($_POST['event_id'])) {
+        $event_id = (int)$_POST['event_id'];
+        $sql = "SELECT u.*, r.reg_date, r.attendance_status, d.dept_name 
+                FROM registration r 
+                JOIN users u ON r.u_id = u.u_id 
+                LEFT JOIN departments d ON u.dept_id = d.dept_id
+                WHERE r.event_id = ? 
+                ORDER BY r.reg_date DESC";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $event_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $participants = [];
+        while ($row = $result->fetch_assoc()) {
+            $img = '';
+            if (!empty($row['profile_image'])) {
+                $raw_img = $row['profile_image'];
+                if (strpos($raw_img, 'data:image') === 0 || strpos($raw_img, 'http') === 0) {
+                    $img = $raw_img;
+                } else {
+                    $img = 'data:image/jpeg;base64,' . base64_encode($raw_img);
+                }
+            } else {
+                $img = 'https://ui-avatars.com/api/?name=' . urlencode($row['name']) . '&background=random';
+            }
+
+            $participants[] = [
+                'u_id' => $row['u_id'],
+                'name' => htmlspecialchars($row['name']),
+                'email' => htmlspecialchars($row['email']),
+                'contact' => htmlspecialchars($row['contact'] ?? 'N/A'),
+                'role' => strtoupper($row['role']),
+                'dept' => htmlspecialchars($row['dept_name'] ?? 'N/A'),
+                'reg_date' => date('d/m/Y H:i', strtotime($row['reg_date'])),
+                'profile_image' => $img,
+                // Including hidden fields as requested (though not normally displayed)
+                'password' => '******', // Security placeholder for the hash
+                'password_updated' => $row['password_updated_at'] ? date('d/m/Y H:i', strtotime($row['password_updated_at'])) : 'Never'
+            ];
+        }
+        $stmt->close();
+        
+        ob_clean();
+        header('Content-Type: application/json');
+        echo json_encode(['success' => true, 'participants' => $participants]);
         exit;
     }
 
@@ -41,16 +127,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             $file_type = $_FILES['image_file']['type'];
             
             $allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-            $max_size = 5 * 1024 * 1024;
+            $max_size = 16 * 1024 * 1024;
             
             if (!in_array($file_type, $allowed_types)) {
                 $response = ['success' => false, 'message' => 'Invalid file type. Please upload JPG, PNG, GIF, or WebP.'];
                 ob_clean(); header('Content-Type: application/json'); echo json_encode($response); exit;
             } elseif ($file_size > $max_size) {
-                $response = ['success' => false, 'message' => 'File size exceeds 5MB limit.'];
+                $response = ['success' => false, 'message' => 'File size exceeds 16MB limit.'];
                 ob_clean(); header('Content-Type: application/json'); echo json_encode($response); exit;
             } else {
-                $img_data = file_get_contents($file_tmp);
+                $img_data = compressEventImage($file_tmp);
                 if ($img_data !== false) {
                     $event_image = $img_data;
                     $update_image = true;
@@ -60,7 +146,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 }
             }
         } elseif (isset($_POST['remove_image']) && $_POST['remove_image'] === '1') {
-            $event_image = ''; 
+            $event_image = null; 
             $update_image = true;
         }
 
@@ -81,7 +167,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         if ($stmt->execute()) {
             $response = ['success' => true, 'message' => 'Event details updated successfully'];
         } else {
-            $response = ['success' => false, 'message' => 'Update failed: ' . $conn->error];
+            $err = $conn->error;
+            $msg = 'Update failed: ' . $err;
+            if (strpos($err, 'max_allowed_packet') !== false || strpos($err, 'Packet too large') !== false) {
+                $msg = 'Image file is too complex for the database. Try a smaller image or ask Admin to increase MySQL max_allowed_packet.';
+            }
+            $response = ['success' => false, 'message' => $msg];
         }
         ob_clean();
         header('Content-Type: application/json');
@@ -98,6 +189,14 @@ $categories = [
     3 => "⚽ Sports",
     4 => "🎨 Cultural"
 ];
+
+$placeholders = [
+    1 => 'https://images.unsplash.com/photo-1523050853063-bd8012fbb2a0?q=80&w=1000&auto=format&fit=crop', // Academic
+    2 => 'https://images.unsplash.com/photo-1540575861501-7c93b177ef96?q=80&w=1000&auto=format&fit=crop', // Workshop
+    3 => 'https://images.unsplash.com/photo-1461896756186-009f97c72c9c?q=80&w=1000&auto=format&fit=crop', // Sports
+    4 => 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=1000&auto=format&fit=crop', // Cultural
+];
+$default_placeholder = 'https://images.unsplash.com/photo-1541339907198-e08756ebafe3?q=80&w=1000&auto=format&fit=crop';
 
 // Fetch Departments
 $dept_list = [];
@@ -168,6 +267,16 @@ if (!$result_past) die("Past Query Failed: " . $conn->error);
             </div>
             <div class="card-body admin-table-wrapper table-responsive">
                 <table class="table table-hover admin-table">
+                    <colgroup>
+                        <col style="width: 50px;">
+                        <col style="width: 25%;">
+                        <col style="width: 10%;">
+                        <col style="width: 100px;">
+                        <col style="width: 20%;">
+                        <col style="width: 80px;">
+                        <col style="width: 100px;">
+                        <col style="width: 120px;">
+                    </colgroup>
                     <thead>
                         <tr>
                             <th>S.N.</th>
@@ -189,9 +298,9 @@ if (!$result_past) die("Past Query Failed: " . $conn->error);
                                         <div class="admin-event-title"><?= htmlspecialchars($row['title']) ?></div>
                                         <small class="badge badge-light"><?= $categories[$row['category_id']] ?? 'Other' ?></small>
                                     </td>
-                                    <td><span class="badge badge-info"><?= htmlspecialchars($row['dept_acronym'] ?? '-') ?></span></td>
+                                    <td class="text-truncate-cell"><span class="badge badge-info"><?= htmlspecialchars($row['dept_acronym'] ?? '-') ?></span></td>
                                     <td><?= date('d/m/Y', strtotime($row['event_date'])) ?></td>
-                                    <td><?= htmlspecialchars($row['venue']) ?></td>
+                                    <td class="text-truncate-cell" title="<?= htmlspecialchars($row['venue']) ?>"><?= htmlspecialchars($row['venue']) ?></td>
                                     <td><?= $row['max_participants'] ?></td>
                                     <td>
                                         <?php if ($row['is_published']): ?>
@@ -201,6 +310,25 @@ if (!$result_past) die("Past Query Failed: " . $conn->error);
                                         <?php endif; ?>
                                     </td>
                                     <td>
+                                        <?php 
+                                            $has_banner = !empty($row['event_image']);
+                                            $preview_img = '';
+                                            if ($has_banner) {
+                                                $raw_img = $row['event_image'];
+                                                if (strpos($raw_img, 'data:image') === 0 || strpos($raw_img, 'http') === 0) {
+                                                    $preview_img = $raw_img;
+                                                } else {
+                                                    $preview_img = 'data:image/jpeg;base64,' . base64_encode($raw_img);
+                                                }
+                                            } else {
+                                                $preview_img = $placeholders[$row['category_id']] ?? $default_placeholder;
+                                            }
+                                        ?>
+                                        <button class="btn btn-xs btn-primary view-participants-btn" 
+                                                data-id="<?= $row['event_id'] ?>"
+                                                data-title="<?= htmlspecialchars($row['title']) ?>">
+                                            <i class="fas fa-users"></i>
+                                        </button>
                                         <button class="btn btn-xs btn-info edit-event-btn" 
                                                 data-id="<?= $row['event_id'] ?>"
                                                 data-title="<?= htmlspecialchars($row['title']) ?>"
@@ -210,7 +338,8 @@ if (!$result_past) die("Past Query Failed: " . $conn->error);
                                                 data-category="<?= $row['category_id'] ?>"
                                                 data-dept="<?= $row['dept_id'] ?>"
                                                 data-description="<?= htmlspecialchars($row['description']) ?>"
-                                                data-image="<?= !empty($row['event_image']) ? 'data:image/jpeg;base64,'.base64_encode($row['event_image']) : 'https://source.unsplash.com/featured/800x600/?'.urlencode($row['title']. ' university') ?>">
+                                                data-has-image="<?= $has_banner ? '1' : '0' ?>"
+                                                data-image="<?= $preview_img ?>">
                                             <i class="fas fa-edit"></i>
                                         </button>
                                         <button class="btn btn-xs btn-danger delete-event-btn" data-id="<?= $row['event_id'] ?>">
@@ -236,6 +365,16 @@ if (!$result_past) die("Past Query Failed: " . $conn->error);
             </div>
             <div class="card-body admin-table-wrapper table-responsive">
                 <table class="table table-hover admin-table">
+                    <colgroup>
+                        <col style="width: 50px;">
+                        <col style="width: 25%;">
+                        <col style="width: 10%;">
+                        <col style="width: 100px;">
+                        <col style="width: 20%;">
+                        <col style="width: 80px;">
+                        <col style="width: 100px;">
+                        <col style="width: 120px;">
+                    </colgroup>
                     <thead>
                         <tr>
                             <th>S.N.</th>
@@ -257,14 +396,33 @@ if (!$result_past) die("Past Query Failed: " . $conn->error);
                                         <div class="admin-event-title text-muted"><?= htmlspecialchars($row['title']) ?></div>
                                         <small class="badge badge-light"><?= $categories[$row['category_id']] ?? 'Other' ?></small>
                                     </td>
-                                    <td><span class="badge badge-secondary"><?= htmlspecialchars($row['dept_acronym'] ?? '-') ?></span></td>
+                                    <td class="text-truncate-cell"><span class="badge badge-secondary"><?= htmlspecialchars($row['dept_acronym'] ?? '-') ?></span></td>
                                     <td class="text-muted"><?= date('d/m/Y', strtotime($row['event_date'])) ?></td>
-                                    <td class="text-muted"><?= htmlspecialchars($row['venue']) ?></td>
+                                    <td class="text-truncate-cell text-muted" title="<?= htmlspecialchars($row['venue']) ?>"><?= htmlspecialchars($row['venue']) ?></td>
                                     <td class="text-muted"><?= $row['max_participants'] ?></td>
                                     <td>
                                         <span class="badge badge-secondary">Ended</span>
                                     </td>
                                     <td>
+                                        <?php 
+                                            $has_banner_past = !empty($row['event_image']);
+                                            $preview_img_past = '';
+                                            if ($has_banner_past) {
+                                                $raw_img = $row['event_image'];
+                                                if (strpos($raw_img, 'data:image') === 0 || strpos($raw_img, 'http') === 0) {
+                                                    $preview_img_past = $raw_img;
+                                                } else {
+                                                    $preview_img_past = 'data:image/jpeg;base64,' . base64_encode($raw_img);
+                                                }
+                                            } else {
+                                                $preview_img_past = $placeholders[$row['category_id']] ?? $default_placeholder;
+                                            }
+                                        ?>
+                                        <button class="btn btn-xs btn-primary view-participants-btn" 
+                                                data-id="<?= $row['event_id'] ?>"
+                                                data-title="<?= htmlspecialchars($row['title']) ?>">
+                                            <i class="fas fa-users"></i>
+                                        </button>
                                         <button class="btn btn-xs btn-info edit-event-btn" 
                                                 data-id="<?= $row['event_id'] ?>"
                                                 data-title="<?= htmlspecialchars($row['title']) ?>"
@@ -274,7 +432,8 @@ if (!$result_past) die("Past Query Failed: " . $conn->error);
                                                 data-category="<?= $row['category_id'] ?>"
                                                 data-dept="<?= $row['dept_id'] ?>"
                                                 data-description="<?= htmlspecialchars($row['description']) ?>"
-                                                data-image="<?= !empty($row['event_image']) ? 'data:image/jpeg;base64,'.base64_encode($row['event_image']) : 'https://source.unsplash.com/featured/800x600/?'.urlencode($row['title']. ' university') ?>">
+                                                data-has-image="<?= $has_banner_past ? '1' : '0' ?>"
+                                                data-image="<?= $preview_img_past ?>">
                                             <i class="fas fa-edit"></i>
                                         </button>
                                         <button class="btn btn-xs btn-danger delete-event-btn" data-id="<?= $row['event_id'] ?>">
@@ -374,7 +533,7 @@ if (!$result_past) die("Past Query Failed: " . $conn->error);
                                 </div>
                                 <div class="edit-image-content-simple">
                                     <input type="file" class="form-control admin-input-flat" id="edit_image_file" name="image_file" accept="image/*">
-                                    <small class="admin-help-text">JPG, PNG, GIF, WebP. Max 5MB.</small>
+                                    <small class="admin-help-text">JPG, PNG, GIF, WebP. Max 16MB.</small>
                                 </div>
                                 <button type="button" class="btn btn-sm btn-outline-danger mt-2" id="editRemoveImageBtn" style="display:none;">
                                     <i class="fas fa-trash-alt"></i> Remove Image
@@ -409,6 +568,43 @@ if (!$result_past) die("Past Query Failed: " . $conn->error);
             <div class="modal-footer admin-modal-footer">
                 <button type="button" class="btn btn-link admin-cancel-link" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" id="confirmDeleteBtn" class="btn btn-danger admin-btn-wide">Delete Event</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Participants Modal -->
+<div class="modal fade" id="participantsModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content admin-modal-content">
+            <div class="modal-header admin-modal-header-info bg-info text-white">
+                <h5 class="modal-title admin-modal-title"><i class="fas fa-users mr-2"></i> Participants: <span id="modal_event_title"></span></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body admin-modal-body">
+                <div class="table-responsive">
+                    <table class="table table-hover admin-table" id="participantsTable">
+                        <thead>
+                            <tr>
+                                <th>S.N.</th>
+                                <th>User</th>
+                                <th>Email/Contact</th>
+                                <th>Dept/Role</th>
+                                <th>Reg. Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="participantsListBody">
+                            <!-- Data will be loaded here via AJAX -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="noParticipantsMsg" class="text-center py-4" style="display:none;">
+                    <i class="fas fa-user-slash fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">No participants have registered for this event yet.</p>
+                </div>
+            </div>
+            <div class="modal-footer admin-modal-footer">
+                <button type="button" class="btn btn-secondary admin-btn-wide" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -495,13 +691,15 @@ $(document).ready(function() {
         $('#edit_remove_image').val('0');
         
         // Show current image preview
+        const hasImage = btn.data('has-image') == '1';
         const img = btn.data('image');
         const previewBox = $('#editImagePreview');
-        if (img && img.length > 50) {
+        
+        if (hasImage) {
             previewBox.html(`<img src="${img}" class="img-preview-mod">`);
             $('#editRemoveImageBtn').show();
         } else {
-            previewBox.html('<i class="fas fa-image edit-preview-icon"></i><p>No image set</p>');
+            previewBox.html('<i class="fas fa-image edit-preview-icon"></i><p>No banner uploaded (using placeholder)</p>');
             $('#editRemoveImageBtn').hide();
         }
         
@@ -512,8 +710,8 @@ $(document).ready(function() {
     $('#edit_image_file').on('change', function() {
         const file = this.files[0];
         if (file) {
-            if (file.size > 5 * 1024 * 1024) {
-                Swal.fire('Error', 'File size exceeds 5MB limit.', 'error');
+            if (file.size > 16 * 1024 * 1024) {
+                Swal.fire('Error', 'File size exceeds 16MB limit.', 'error');
                 $(this).val('');
                 return;
             }
@@ -530,6 +728,75 @@ $(document).ready(function() {
         $('#edit_image_file').val('');
         $('#editImagePreview').html('<i class="fas fa-image edit-preview-icon"></i><p>Image removed</p>');
         $(this).hide();
+    });
+
+    // View Participants Logic
+    $(document).on('click', '.view-participants-btn', function() {
+        const eventId = $(this).data('id');
+        const eventTitle = $(this).data('title');
+        $('#modal_event_title').text(eventTitle);
+        
+        const modal = new bootstrap.Modal(document.getElementById('participantsModal'));
+        const listBody = $('#participantsListBody');
+        const noMsg = $('#noParticipantsMsg');
+        const table = $('#participantsTable');
+
+        listBody.html('<tr><td colspan="6" class="text-center"><i class="fas fa-spinner fa-spin"></i> Loading participants...</td></tr>');
+        noMsg.hide();
+        table.show();
+        modal.show();
+
+        $.ajax({
+            url: '',
+            method: 'POST',
+            data: { action: 'fetch_participants', event_id: eventId },
+            success: function(response) {
+                try {
+                    const data = typeof response === 'string' ? JSON.parse(response) : response;
+                    if (data.success) {
+                        if (data.participants.length > 0) {
+                            let html = '';
+                            data.participants.forEach((p, index) => {
+                                html += `
+                                    <tr>
+                                        <td>${index + 1}</td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="${p.profile_image}" class="rounded-circle mr-2" style="width: 35px; height: 35px; object-fit: cover; border: 2px solid var(--primary-purple);">
+                                                <div>
+                                                    <div><strong>${p.name}</strong></div>
+                                                    <small class="text-muted">ID: #${p.u_id}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div>${p.email}</div>
+                                            <small class="text-muted"><i class="fas fa-phone-alt mr-1"></i>${p.contact}</small>
+                                        </td>
+                                        <td>
+                                            <div><span class="badge badge-outline-info">${p.dept}</span></div>
+                                            <small class="badge badge-pill badge-light">${p.role}</small>
+                                        </td>
+                                        <td>${p.reg_date}</td>
+                                    </tr>
+                                `;
+                            });
+                            listBody.html(html);
+                        } else {
+                            table.hide();
+                            noMsg.show();
+                        }
+                    } else {
+                        listBody.html(`<tr><td colspan="6" class="text-center text-danger">${data.message}</td></tr>`);
+                    }
+                } catch(err) {
+                    listBody.html('<tr><td colspan="6" class="text-center text-danger">Failed to parse response.</td></tr>');
+                }
+            },
+            error: function() {
+                listBody.html('<tr><td colspan="6" class="text-center text-danger">Connection failed.</td></tr>');
+            }
+        });
     });
 
     // Handle Edit Form Submission
