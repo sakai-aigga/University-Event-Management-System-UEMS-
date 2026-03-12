@@ -33,6 +33,14 @@ document.getElementById('registerForm')?.addEventListener('submit', async functi
     // Collect form data
     const formData = new FormData(this);
 
+    // Contact validation
+    const contact = formData.get('contact');
+    const contactRegex = /^[9][6-8][0-9]{8}$/; // Nepal style: 98xxxxxxxx or 97xxxxxxxx
+    if (contact && !contactRegex.test(contact)) {
+        document.getElementById('errorMessage').textContent = 'Please enter a valid 10-digit mobile number starting with 9.';
+        return;
+    }
+
     try {
         const response = await fetch('../api/register/index.php', {
             method: 'POST',
