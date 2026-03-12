@@ -21,6 +21,9 @@ body,
 .wrapper {
     background: var(--bg-gradient) !important;
     background-attachment: fixed !important;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
 /* ===================== LAYOUT ===================== */
@@ -128,6 +131,10 @@ body,
 }
 
 /* =================== FOOTER ===================== */
+.main-footer {
+    margin-top: auto;
+}
+
 .admin-footer-version {
     float: right;
     display: none;
@@ -263,7 +270,8 @@ body,
 }
 
 .admin-table {
-    white-space: nowrap;
+    width: 100%;
+    table-layout: fixed;
 }
 
 .admin-table thead {
@@ -534,6 +542,16 @@ body,
 /* ============ EVENTS: MANAGE PAGE =============== */
 .admin-event-title {
     font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+}
+
+.text-truncate-cell {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 /* ===== EDIT EVENT MODAL: IMAGE UPLOAD ===== */
