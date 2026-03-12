@@ -48,31 +48,37 @@ if (!isset($_SESSION['u_id'])) {
     $u_id = $_SESSION['u_id'];
 }
 
-// 2. Fetch Event Data (Cap Check & Date Check)
-$event_sql = "SELECT event_date, max_participants, 
-             (SELECT COUNT(*) FROM registration WHERE event_id = ?) as current_participants 
-             FROM event WHERE event_id = ?";
-$stmt = $conn->prepare($event_sql);
-$stmt->bind_param("ii", $event_id, $event_id);
-$stmt->execute();
-$res = $stmt->get_result();
-$event = $res->fetch_assoc();
-$stmt->close();
+// 2. Fetch Event Data with Locking
+$conn->begin_transaction();
 
-if (!$event) {
-    echo json_encode(["success" => false, "message" => "Event not found."]);
-    exit;
-}
+try {
+    $event_sql = "SELECT event_date, max_participants, 
+                 (SELECT COUNT(*) FROM registration WHERE event_id = ?) as current_participants 
+                 FROM event WHERE event_id = ? FOR UPDATE"; // Row-level lock
+    $stmt = $conn->prepare($event_sql);
+    $stmt->bind_param("ii", $event_id, $event_id);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    $event = $res->fetch_assoc();
+    $stmt->close();
 
-if (strtotime($event['event_date']) < strtotime(date('Y-m-d'))) {
-    echo json_encode(["success" => false, "message" => "Registration is closed for past events."]);
-    exit;
-}
+    if (!$event) {
+        $conn->rollback();
+        echo json_encode(["success" => false, "message" => "Event not found."]);
+        exit;
+    }
 
-if ($event['max_participants'] > 0 && $event['current_participants'] >= $event['max_participants']) {
-    echo json_encode(["success" => false, "message" => "Event is fully booked."]);
-    exit;
-}
+    if (strtotime($event['event_date']) < strtotime(date('Y-m-d'))) {
+        $conn->rollback();
+        echo json_encode(["success" => false, "message" => "Registration is closed for past events."]);
+        exit;
+    }
+
+    if ($event['max_participants'] > 0 && $event['current_participants'] >= $event['max_participants']) {
+        $conn->rollback();
+        echo json_encode(["success" => false, "message" => "Event is fully booked."]);
+        exit;
+    }
 
 // 3. Duplicate Check
 $check_sql = "SELECT reg_id FROM registration WHERE event_id = ? AND u_id = ?";
@@ -93,16 +99,23 @@ $user_stmt->bind_result($reg_name, $reg_email, $reg_contact);
 $user_stmt->fetch();
 $user_stmt->close();
 
-// 5. Perform Registration
-$attendance_status = 'Pending';
-$reg_sql = "INSERT INTO registration (event_id, u_id, name, email, contact, attendance_status) VALUES (?, ?, ?, ?, ?, ?)";
-$reg_stmt = $conn->prepare($reg_sql);
-$reg_stmt->bind_param("iissss", $event_id, $u_id, $reg_name, $reg_email, $reg_contact, $attendance_status);
+    // 5. Perform Registration
+    $attendance_status = 'Pending';
+    $reg_sql = "INSERT INTO registration (event_id, u_id, name, email, contact, attendance_status) VALUES (?, ?, ?, ?, ?, ?)";
+    $reg_stmt = $conn->prepare($reg_sql);
+    $reg_stmt->bind_param("iissss", $event_id, $u_id, $reg_name, $reg_email, $reg_contact, $attendance_status);
 
-if ($reg_stmt->execute()) {
-    echo json_encode(["success" => true, "message" => "Registered successfully!"]);
-} else {
-    echo json_encode(["success" => false, "message" => "Registration error: " . $conn->error]);
+    if ($reg_stmt->execute()) {
+        $conn->commit();
+        echo json_encode(["success" => true, "message" => "Registered successfully!"]);
+    } else {
+        $conn->rollback();
+        echo json_encode(["success" => false, "message" => "Registration error: " . $conn->error]);
+    }
+    $reg_stmt->close();
+} catch (Exception $e) {
+    $conn->rollback();
+    echo json_encode(["success" => false, "message" => "Transaction error: " . $e->getMessage()]);
 }
-$reg_stmt->close();
+
 $conn->close();
