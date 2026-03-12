@@ -164,36 +164,40 @@ $active_page = $active_pageInfo['active_page'] ?? null;
                         <!-- Notification Bell Dropdown -->
                         <ul class="navbar-nav">
                             <li class="nav-item dropdown">
-                                <a class="nav-link" data-bs-toggle="dropdown" href="#" style="position: relative;">
+                                <a class="nav-link" data-bs-toggle="dropdown" href="#" style="position: relative;" id="notif-bell">
                                     <i class="far fa-bell" style="font-size: 1.2rem;"></i>
-                                    <?php if ($unread_count > 0): ?>
-                                        <span class="badge rounded-pill bg-danger" style="position: absolute; top: 0; right: -5px; font-size: 0.65rem; border: 2px solid var(--dark-purple);"><?= $unread_count ?></span>
-                                    <?php endif; ?>
+                                    <span id="notif-badge-container">
+                                        <?php if ($unread_count > 0): ?>
+                                            <span class="badge rounded-pill bg-danger" style="position: absolute; top: 0; right: -5px; font-size: 0.65rem; border: 2px solid var(--dark-purple);"><?= $unread_count ?></span>
+                                        <?php endif; ?>
+                                    </span>
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end border-0 shadow-lg" style="min-width: 300px; border-radius: 12px; margin-top: 10px;">
                                     <div class="dropdown-header text-center" style="background: var(--bg-light); border-top-left-radius: 12px; border-top-right-radius: 12px;">
-                                        <strong style="color: var(--text-dark);">
+                                        <strong style="color: var(--text-dark);" id="notif-header-text">
                                             <?= $unread_count ?> New Notifications
                                         </strong>
                                     </div>
                                     <div class="dropdown-divider m-0"></div>
                                     
-                                    <?php if (empty($recent_notifications)): ?>
-                                        <a href="#" class="dropdown-item text-center text-muted py-3">
-                                            No recent notifications.
-                                        </a>
-                                    <?php else: ?>
-                                        <?php foreach ($recent_notifications as $notif): ?>
-                                            <a href="<?= BASE_URL ?>/admin-panel/notifications.php" class="dropdown-item py-3" style="white-space: normal; line-height: 1.4;">
-                                                <i class="fas fa-envelope mr-2 text-primary"></i> 
-                                                <strong><?= htmlspecialchars($notif['name'] ?? 'User') ?></strong> left a message: <br>
-                                                <span class="text-muted text-sm d-inline-block mt-1" style="max-height: 40px; overflow: hidden; text-overflow: ellipsis;">
-                                                    <?= htmlspecialchars(substr($notif['message'] ?? '', 0, 50)) ?>...
-                                                </span>
+                                    <div id="notif-items-container">
+                                        <?php if (empty($recent_notifications)): ?>
+                                            <a href="#" class="dropdown-item text-center text-muted py-3">
+                                                No recent notifications.
                                             </a>
-                                            <div class="dropdown-divider m-0"></div>
-                                        <?php endforeach; ?>
-                                    <?php endif; ?>
+                                        <?php else: ?>
+                                            <?php foreach ($recent_notifications as $notif): ?>
+                                                <a href="<?= BASE_URL ?>/admin-panel/notifications.php" class="dropdown-item py-3" style="white-space: normal; line-height: 1.4;">
+                                                    <i class="fas fa-envelope mr-2 text-primary"></i> 
+                                                    <strong><?= htmlspecialchars($notif['name'] ?? 'User') ?></strong> left a message: <br>
+                                                    <span class="text-muted text-sm d-inline-block mt-1" style="max-height: 40px; overflow: hidden; text-overflow: ellipsis;">
+                                                        <?= htmlspecialchars(substr($notif['message'] ?? '', 0, 50)) ?>...
+                                                    </span>
+                                                </a>
+                                                <div class="dropdown-divider m-0"></div>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
+                                    </div>
 
                                     <a href="<?= BASE_URL ?>/admin-panel/notifications.php" class="dropdown-item dropdown-footer text-center" style="background: var(--bg-light); border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
                                         See All Inquiries
@@ -272,3 +276,54 @@ $active_page = $active_pageInfo['active_page'] ?? null;
         <div class="content-wrapper">
             <section class="content">
                 <div class="container-fluid">
+
+<script>
+    // Real-time Notification Updates
+    function updateNotifications() {
+        $.ajax({
+            url: '<?= BASE_URL ?>/api/admin/get-notifications.php',
+            method: 'GET',
+            success: function(response) {
+                if (response.success) {
+                    // Update Badge
+                    const badgeContainer = $('#notif-badge-container');
+                    if (response.unread_count > 0) {
+                        badgeContainer.html(`<span class="badge rounded-pill bg-danger" style="position: absolute; top: 0; right: -5px; font-size: 0.65rem; border: 2px solid var(--dark-purple);">${response.unread_count}</span>`);
+                    } else {
+                        badgeContainer.empty();
+                    }
+
+                    // Update Header Text
+                    $('#notif-header-text').text(`${response.unread_count} New Notifications`);
+
+                    // Update List
+                    const itemsContainer = $('#notif-items-container');
+                    if (response.recent.length === 0) {
+                        itemsContainer.html('<a href="#" class="dropdown-item text-center text-muted py-3">No recent notifications.</a>');
+                    } else {
+                        let html = '';
+                        response.recent.forEach(notif => {
+                            html += `
+                                <a href="<?= BASE_URL ?>/admin-panel/notifications.php" class="dropdown-item py-3" style="white-space: normal; line-height: 1.4;">
+                                    <i class="fas fa-envelope mr-2 text-primary"></i> 
+                                    <strong>${notif.name || 'User'}</strong> left a message: <br>
+                                    <span class="text-muted text-sm d-inline-block mt-1" style="max-height: 40px; overflow: hidden; text-overflow: ellipsis;">
+                                        ${notif.message_short}
+                                    </span>
+                                </a>
+                                <div class="dropdown-divider m-0"></div>
+                            `;
+                        });
+                        itemsContainer.html(html);
+                    }
+                }
+            },
+            error: function(err) {
+                console.error("Notification Fetch Error:", err);
+            }
+        });
+    }
+
+    // Update every 10 seconds
+    setInterval(updateNotifications, 10000);
+</script>
