@@ -26,6 +26,7 @@ if (empty($email) || empty($password)) {
     exit;
 }
 
+
 // Fetch user with role from DB
 $stmt = $conn->prepare(
     "SELECT u_id, name, password, role FROM users WHERE email = ? LIMIT 1"

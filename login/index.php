@@ -1,6 +1,6 @@
 <?php
 session_start();
-//Redirect to different page if already logged in
+//Redirection
 if (isset($_SESSION['role'])) {
     if ($_SESSION['role'] === 'admin') {
         header("Location: ../admin-panel/");
@@ -16,6 +16,7 @@ if (isset($_SESSION['role'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KUEMS Login</title>
+    <link rel="icon" href="../assets/images/UEMS_logo.png" type="image/x-icon">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../assets/css/styles.css">
 </head>

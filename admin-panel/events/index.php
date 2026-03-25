@@ -40,6 +40,59 @@ function compressEventImage($source_path, $quality = 60, $max_width = 1200) {
     return $compressed_data;
 }
 
+// Handle CSV Export - MUST BE BEFORE ANY OUTPUT
+if (isset($_GET['action']) && $_GET['action'] === 'export_csv' && isset($_GET['event_id'])) {
+    $event_id = (int)$_GET['event_id'];
+    
+    // Fetch event title for filename
+    $stmt_event = $conn->prepare("SELECT title FROM event WHERE event_id = ?");
+    $stmt_event->bind_param("i", $event_id);
+    $stmt_event->execute();
+    $event_title = $stmt_event->get_result()->fetch_assoc()['title'] ?? 'event';
+    $stmt_event->close();
+
+    $sql = "SELECT u.name, u.email, u.contact, u.role, d.dept_name, r.reg_date, r.attendance_status 
+            FROM registration r 
+            JOIN users u ON r.u_id = u.u_id 
+            LEFT JOIN departments d ON u.dept_id = d.dept_id
+            WHERE r.event_id = ? 
+            ORDER BY r.reg_date ASC";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $event_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    $filename = "Participants_" . preg_replace('/[^a-zA-Z0-9]/', '_', $event_title) . "_" . date('Y-m-d') . ".csv";
+    
+    // Clean output buffer
+    if (ob_get_length()) ob_end_clean();
+    
+    header('Content-Type: text/csv; charset=utf-8');
+    header('Content-Disposition: attachment; filename="' . $filename . '"');
+
+    $output = fopen('php://output', 'w');
+    // Add BOM for Excel UTF-8 support
+    fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+    
+    fputcsv($output, ['S.N.', 'Name', 'Email', 'Contact', 'Role', 'Department', 'Registration Date', 'Attendance Status']);
+
+    $sn = 1;
+    while ($row = $result->fetch_assoc()) {
+        fputcsv($output, [
+            $sn++,
+            $row['name'],
+            $row['email'],
+            $row['contact'] ?? 'N/A',
+            strtoupper($row['role']),
+            $row['dept_name'] ?? 'N/A',
+            date('d/m/Y H:i', strtotime($row['reg_date'])),
+            $row['attendance_status']
+        ]);
+    }
+    fclose($output);
+    exit;
+}
+
 // Handle AJAX Requests (Delete/Update) - MUST BE AT TOP
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     $response = ['success' => false, 'message' => 'Invalid action'];
@@ -577,9 +630,14 @@ if (!$result_past) die("Past Query Failed: " . $conn->error);
 <div class="modal fade" id="participantsModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <div class="modal-content admin-modal-content">
-            <div class="modal-header admin-modal-header-info bg-info text-white">
+            <div class="modal-header admin-modal-header-info bg-info text-white d-flex align-items-center">
                 <h5 class="modal-title admin-modal-title"><i class="fas fa-users mr-2"></i> Participants: <span id="modal_event_title"></span></h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="ms-auto d-flex align-items-center">
+                    <button type="button" id="exportCSVBtn" class="btn btn-sm btn-light me-2" style="display:none;">
+                        <i class="fas fa-file-csv text-success"></i> Export CSV
+                    </button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
             </div>
             <div class="modal-body admin-modal-body">
                 <div class="table-responsive">
@@ -744,6 +802,7 @@ $(document).ready(function() {
         listBody.html('<tr><td colspan="6" class="text-center"><i class="fas fa-spinner fa-spin"></i> Loading participants...</td></tr>');
         noMsg.hide();
         table.show();
+        $('#exportCSVBtn').hide();
         modal.show();
 
         $.ajax({
@@ -755,6 +814,7 @@ $(document).ready(function() {
                     const data = typeof response === 'string' ? JSON.parse(response) : response;
                     if (data.success) {
                         if (data.participants.length > 0) {
+                            $('#exportCSVBtn').show().data('id', eventId);
                             let html = '';
                             data.participants.forEach((p, index) => {
                                 html += `
@@ -796,6 +856,12 @@ $(document).ready(function() {
                 listBody.html('<tr><td colspan="6" class="text-center text-danger">Connection failed.</td></tr>');
             }
         });
+    });
+
+    // Handle CSV Export Click
+    $('#exportCSVBtn').on('click', function() {
+        const eventId = $(this).data('id');
+        window.location.href = `index.php?action=export_csv&event_id=${eventId}`;
     });
 
     // Handle Edit Form Submission

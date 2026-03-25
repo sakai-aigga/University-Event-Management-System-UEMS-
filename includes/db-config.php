@@ -1,15 +1,4 @@
 <?php
-// --- Add these lines to fix connection issues ---
-if (!headers_sent()) {
-    header("Access-Control-Allow-Origin: *");
-    header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
-    header("Access-Control-Allow-Headers: Content-Type, Authorization");
-
-    if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-        exit; // Handle preflight requests
-    }
-}
-// ------------------------------------------------
 
 $host = "localhost";
 $user = "root";

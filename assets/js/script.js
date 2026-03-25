@@ -35,9 +35,16 @@ document.getElementById('registerForm')?.addEventListener('submit', async functi
 
     // Contact validation
     const contact = formData.get('contact');
-    const contactRegex = /^[9][6-8][0-9]{8}$/; // Nepal style: 98xxxxxxxx or 97xxxxxxxx
+    const contactRegex = /^[9][6-8][0-9]{8}$/;
     if (contact && !contactRegex.test(contact)) {
         document.getElementById('errorMessage').textContent = 'Please enter a valid 10-digit mobile number starting with 9.';
+        return;
+    }
+    //Email Validation (needs editing for further implementation)
+    const email = formData.get('email');
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (email && !emailRegex.test(email)) {
+        document.getElementById('errorMessage').textContent = 'Please enter a valid email address.';
         return;
     }
 

@@ -2,12 +2,12 @@
 ob_start();
 require_once '../../includes/db-config.php';
 
-// Session management (normally in header.php, but needed here for AJAX)
+// Session management (for AJAX)
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Security Check (same as header.php)
+// Security Check
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     if (isset($_POST['ajax'])) {
         echo json_encode(['success' => false, 'message' => 'Unauthorized access.']);

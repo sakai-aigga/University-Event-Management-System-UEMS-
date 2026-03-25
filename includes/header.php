@@ -8,6 +8,7 @@ include_once __DIR__ . '/path-config.php';
 
 <!-- Global Scripts & Styles -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="icon" href="<?= BASE_URL ?>/assets/images/UEMS_logo.png" type="image/x-icon"> <!-- For proper path definition -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <header>
