@@ -845,3 +845,8 @@ body,
 .nav-link {
     transition: all 0.2s ease;
 }
+
+/* Force Events sub-menu permanently open */
+.events-menu-item.has-treeview > .nav-treeview {
+    display: block !important;
+}

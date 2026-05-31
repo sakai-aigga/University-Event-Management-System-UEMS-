@@ -1,6 +1,11 @@
 <?php
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 include '../../includes/db-config.php';
 
 if (isset($_GET['id'])) {
@@ -41,7 +46,6 @@ if (isset($_GET['id'])) {
             $event['event_image'] = isset($placeholders[$event['category_id']]) ? $placeholders[$event['category_id']] : 'https://images.unsplash.com/photo-1541339907198-e08756ebafe3?q=80&w=1000&auto=format&fit=crop';
         }
         
-        session_start();
         $is_registered = false;
         if (isset($_SESSION['u_id'])) {
             $u_id = $_SESSION['u_id'];

@@ -2,6 +2,14 @@
 ob_start();
 require_once '../../includes/db-config.php';
 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+require_once '../../includes/path-config.php';
+
+$is_admin = isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
+
 // Helper function to compress and resize images to prevent database packet errors
 function compressEventImage($source_path, $quality = 60, $max_width = 1200) {
     if (!extension_loaded('gd')) return file_get_contents($source_path);
@@ -42,6 +50,10 @@ function compressEventImage($source_path, $quality = 60, $max_width = 1200) {
 
 // Handle CSV Export - MUST BE BEFORE ANY OUTPUT
 if (isset($_GET['action']) && $_GET['action'] === 'export_csv' && isset($_GET['event_id'])) {
+    if (!$is_admin) {
+        http_response_code(403);
+        exit('Unauthorized');
+    }
     $event_id = (int)$_GET['event_id'];
     
     // Fetch event title for filename
@@ -95,16 +107,37 @@ if (isset($_GET['action']) && $_GET['action'] === 'export_csv' && isset($_GET['e
 
 // Handle AJAX Requests (Delete/Update) - MUST BE AT TOP
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+    if (!$is_admin) {
+        ob_clean();
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+        exit;
+    }
+
     $response = ['success' => false, 'message' => 'Invalid action'];
 
     if ($_POST['action'] === 'delete' && isset($_POST['event_id'])) {
         $event_id = (int)$_POST['event_id'];
-        $stmt = $conn->prepare("DELETE FROM event WHERE event_id = ?");
-        $stmt->bind_param("i", $event_id);
-        if ($stmt->execute()) {
-            $response = ['success' => true, 'message' => 'Event deleted successfully'];
-        } else {
-            $response = ['success' => false, 'message' => 'Database error: ' . $conn->error];
+        $conn->begin_transaction();
+        try {
+            $del_reg = $conn->prepare("DELETE FROM registration WHERE event_id = ?");
+            $del_reg->bind_param("i", $event_id);
+            $del_reg->execute();
+            $del_reg->close();
+
+            $stmt = $conn->prepare("DELETE FROM event WHERE event_id = ?");
+            $stmt->bind_param("i", $event_id);
+            if ($stmt->execute() && $stmt->affected_rows > 0) {
+                $conn->commit();
+                $response = ['success' => true, 'message' => 'Event deleted successfully'];
+            } else {
+                $conn->rollback();
+                $response = ['success' => false, 'message' => 'Database error: ' . $conn->error];
+            }
+            $stmt->close();
+        } catch (Exception $e) {
+            $conn->rollback();
+            $response = ['success' => false, 'message' => 'Failed to delete event.'];
         }
         ob_clean();
         header('Content-Type: application/json');

@@ -233,15 +233,21 @@ $active_page = $active_pageInfo['active_page'] ?? null;
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
                         <?php foreach ($menuItems as $menuItem): ?>
                             <?php if (isset($menuItem['pages'])): ?>
-                                <li class="nav-item has-treeview <?= $menuItem === $active_menu ? 'menu-open' : '' ?>">
-                                    <a class="nav-link <?= $menuItem === $active_menu ? 'active' : '' ?>" href="#">
+                                <?php 
+                                $isEvents = ($menuItem['menuTitle'] === 'Events');
+                                $isOpen = $isEvents || ($menuItem === $active_menu);
+                                ?>
+                                <li class="nav-item has-treeview <?= $isOpen ? 'menu-open' : '' ?> <?= $isEvents ? 'events-menu-item' : '' ?>">
+                                    <a class="nav-link <?= $menuItem === $active_menu ? 'active' : '' ?>" href="#" <?= $isEvents ? 'onclick="return false;" style="cursor: default;"' : '' ?>>
                                         <i class="nav-icon <?= $menuItem['icon'] ?>"></i>
                                         <p>
                                             <?= $menuItem['menuTitle'] ?>
-                                            <i class="right fas fa-angle-left"></i>
+                                            <?php if (!$isEvents): ?>
+                                                <i class="right fas fa-angle-left"></i>
+                                            <?php endif; ?>
                                         </p>
                                     </a>
-                                    <ul class="nav nav-treeview">
+                                    <ul class="nav nav-treeview" style="<?= $isOpen ? 'display: block;' : '' ?>">
                                         <?php foreach ($menuItem['pages'] as $page): ?>
                                             <li class="nav-item">
                                                 <a href="<?= $page['url'] ?>"

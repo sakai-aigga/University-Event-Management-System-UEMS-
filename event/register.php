@@ -86,24 +86,18 @@ $check_stmt = $conn->prepare($check_sql);
 $check_stmt->bind_param("ii", $event_id, $u_id);
 $check_stmt->execute();
 if ($check_stmt->get_result()->num_rows > 0) {
+    $check_stmt->close();
+    $conn->rollback();
     echo json_encode(["success" => false, "message" => "You are already registered."]);
     exit;
 }
 $check_stmt->close();
 
-// 4. Fetch User Details for Recording
-$user_stmt = $conn->prepare("SELECT name, email, contact FROM users WHERE u_id = ?");
-$user_stmt->bind_param("i", $u_id);
-$user_stmt->execute();
-$user_stmt->bind_result($reg_name, $reg_email, $reg_contact);
-$user_stmt->fetch();
-$user_stmt->close();
-
-    // 5. Perform Registration
+// 4. Perform Registration
     $attendance_status = 'Pending';
-    $reg_sql = "INSERT INTO registration (event_id, u_id, name, email, contact, attendance_status) VALUES (?, ?, ?, ?, ?, ?)";
+    $reg_sql = "INSERT INTO registration (event_id, u_id, attendance_status) VALUES (?, ?, ?)";
     $reg_stmt = $conn->prepare($reg_sql);
-    $reg_stmt->bind_param("iissss", $event_id, $u_id, $reg_name, $reg_email, $reg_contact, $attendance_status);
+    $reg_stmt->bind_param("iis", $event_id, $u_id, $attendance_status);
 
     if ($reg_stmt->execute()) {
         $conn->commit();

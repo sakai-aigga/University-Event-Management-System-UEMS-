@@ -2,6 +2,22 @@
 ob_start();
 require_once '../includes/db-config.php';
 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Authorization check before handling AJAX requests or rendering
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+    if (isset($_GET['action']) || ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']))) {
+        ob_clean();
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+        exit;
+    }
+    header('Location: ../index.php');
+    exit;
+}
+
 // ─── AJAX: Fetch notifications as JSON ──────────────────────────────────────
 if (isset($_GET['action']) && $_GET['action'] === 'fetch') {
     $sql = "SELECT * FROM contact_submissions ORDER BY is_read ASC, submitted_at DESC";

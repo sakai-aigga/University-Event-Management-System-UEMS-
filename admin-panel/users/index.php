@@ -1,33 +1,74 @@
 <?php
+ob_start();
 require_once '../../includes/db-config.php';
-require_once '../header.php';
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+require_once '../../includes/path-config.php';
+
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+    header('Location: ' . BASE_URL . '/index.php');
+    exit;
+}
+
+$current_admin_id = (int)($_SESSION['u_id'] ?? 0);
+$flash_script = '';
 
 // Handle Role Change
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'change_role') {
     $u_id = intval($_POST['u_id']);
     $new_role = $_POST['role'] === 'admin' ? 'admin' : 'user';
-    $update_stmt = $conn->prepare("UPDATE users SET role = ? WHERE u_id = ?");
-    $update_stmt->bind_param("si", $new_role, $u_id);
-    if ($update_stmt->execute()) {
-        echo "<script>document.addEventListener('DOMContentLoaded', function() { Swal.fire('Success', 'Role updated successfully!', 'success').then(() => { window.location.href='index.php'; }); });</script>";
+
+    if ($u_id === $current_admin_id) {
+        $flash_script = "Swal.fire('Error', 'You cannot change your own role.', 'error')";
     } else {
-        echo "<script>document.addEventListener('DOMContentLoaded', function() { Swal.fire('Error', 'Failed to update role.', 'error'); });</script>";
+        $update_stmt = $conn->prepare("UPDATE users SET role = ? WHERE u_id = ?");
+        $update_stmt->bind_param("si", $new_role, $u_id);
+        if ($update_stmt->execute() && $update_stmt->affected_rows > 0) {
+            $flash_script = "Swal.fire('Success', 'Role updated successfully!', 'success').then(() => { window.location.href='index.php'; })";
+        } else {
+            $flash_script = "Swal.fire('Error', 'Failed to update role.', 'error')";
+        }
+        $update_stmt->close();
     }
 }
 
 // Handle Delete User
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete_user') {
     $u_id = intval($_POST['u_id']);
-    $delete_stmt = $conn->prepare("DELETE FROM users WHERE u_id = ?");
-    $delete_stmt->bind_param("i", $u_id);
-    if ($delete_stmt->execute()) {
-        echo "<script>document.addEventListener('DOMContentLoaded', function() { Swal.fire('Deleted!', 'User has been deleted.', 'success').then(() => { window.location.href='index.php'; }); });</script>";
+
+    if ($u_id === $current_admin_id) {
+        $flash_script = "Swal.fire('Error', 'You cannot delete your own account from here.', 'error')";
     } else {
-        echo "<script>document.addEventListener('DOMContentLoaded', function() { Swal.fire('Error', 'Failed to delete user.', 'error'); });</script>";
+        $conn->begin_transaction();
+        try {
+            $del_reg = $conn->prepare("DELETE FROM registration WHERE u_id = ?");
+            $del_reg->bind_param("i", $u_id);
+            $del_reg->execute();
+            $del_reg->close();
+
+            $delete_stmt = $conn->prepare("DELETE FROM users WHERE u_id = ?");
+            $delete_stmt->bind_param("i", $u_id);
+            if ($delete_stmt->execute() && $delete_stmt->affected_rows > 0) {
+                $conn->commit();
+                $flash_script = "Swal.fire('Deleted!', 'User has been deleted.', 'success').then(() => { window.location.href='index.php'; })";
+            } else {
+                $conn->rollback();
+                $flash_script = "Swal.fire('Error', 'Failed to delete user.', 'error')";
+            }
+            $delete_stmt->close();
+        } catch (Exception $e) {
+            $conn->rollback();
+            $flash_script = "Swal.fire('Error', 'Failed to delete user.', 'error')";
+        }
     }
 }
 
-// Fetch all users
+require_once '../header.php';
+
+// Fetch all users including the logged-in admin
 $sql = "SELECT u_id, name, email, contact, role FROM users ORDER BY u_id DESC";
 $result = $conn->query($sql);
 ?>
@@ -64,12 +105,16 @@ $result = $conn->query($sql);
                                         </span>
                                     </td>
                                     <td>
-                                        <button class="btn btn-sm btn-outline-secondary" title="Change Role" data-bs-toggle="modal" data-bs-target="#changeRoleModal" onclick="setRoleModalData(<?= $row['u_id'] ?>, '<?= $row['role'] ?>', '<?= htmlspecialchars(addslashes($row['name'])) ?>')">
-                                            <i class="fas fa-user-cog"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-danger" title="Delete User" data-bs-toggle="modal" data-bs-target="#deleteUserModal" onclick="setDeleteModalData(<?= $row['u_id'] ?>, '<?= htmlspecialchars(addslashes($row['name'])) ?>')">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
+                                        <?php if ((int)$row['u_id'] === $current_admin_id): ?>
+                                            <span class="text-muted small"><i class="fas fa-user-shield"></i> Current User</span>
+                                        <?php else: ?>
+                                            <button class="btn btn-sm btn-outline-secondary" title="Change Role" data-bs-toggle="modal" data-bs-target="#changeRoleModal" onclick="setRoleModalData(<?= $row['u_id'] ?>, '<?= $row['role'] ?>', '<?= htmlspecialchars(addslashes($row['name'])) ?>')">
+                                                <i class="fas fa-user-cog"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger" title="Delete User" data-bs-toggle="modal" data-bs-target="#deleteUserModal" onclick="setDeleteModalData(<?= $row['u_id'] ?>, '<?= htmlspecialchars(addslashes($row['name'])) ?>')">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        <?php endif; ?>
                                     </td>
                                 </tr>
                             <?php endwhile; ?>
@@ -138,6 +183,12 @@ $result = $conn->query($sql);
         </div>
     </div>
 </div>
+
+<?php if ($flash_script): ?>
+<script>
+    document.addEventListener('DOMContentLoaded', function() { <?= $flash_script ?>; });
+</script>
+<?php endif; ?>
 
 <script>
     function setRoleModalData(id, role, name) {

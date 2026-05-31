@@ -1,4 +1,5 @@
 <?php
+ob_start(); // Enable output buffering for non-blocking response
 include "../includes/db-config.php";
 include "../includes/mail-helper.php";
 
@@ -46,49 +47,20 @@ $conn->query($sql_create);
 @$conn->query("ALTER TABLE contact_submissions ADD COLUMN message TEXT AFTER email");
 @$conn->query("ALTER TABLE contact_submissions ADD COLUMN is_read TINYINT(1) DEFAULT 0 AFTER message");
 
-// 1. Check for cooldown (5 minutes)
-$cooldown_seconds = 300; // 5 minutes
-$cooldown_check = "SELECT TIMESTAMPDIFF(SECOND, MAX(submitted_at), NOW()) as seconds_since
-                   FROM contact_submissions WHERE user_id = $user_id";
-$res_cooldown = $conn->query($cooldown_check);
-if ($res_cooldown && $row = $res_cooldown->fetch_assoc()) {
-    if ($row['seconds_since'] !== null && (int)$row['seconds_since'] < $cooldown_seconds) {
-        $wait_seconds = $cooldown_seconds - (int)$row['seconds_since'];
-        $wait_minutes = max(1, (int)ceil($wait_seconds / 60));
-        $unit = $wait_minutes === 1 ? 'minute' : 'minutes';
-        echo json_encode([
-            "success" => false,
-            "message" => "Please wait {$wait_minutes} {$unit} before sending another message."
-        ]);
-        exit;
-    }
-}
-
-// 2. Check for message limit (e.g., 5 per day)
-$limit_check = "SELECT COUNT(*) as total FROM contact_submissions WHERE user_id = $user_id AND submitted_at > NOW() - INTERVAL 1 DAY";
-$res_limit = $conn->query($limit_check);
-if ($res_limit && $row = $res_limit->fetch_assoc()) {
-    if ($row['total'] >= 2) {
-        echo json_encode([
-            "success" => false, 
-            "message" => "You have reached your daily limit of 2 messages. Please try again tomorrow."
-        ]);
-        exit;
-    }
-}
+// No cooldown or limit checks - message sent instantly without waiting constraints
 
 // Get POST data
-$name = $_POST['name'] ?? '';
 $message = $_POST['message'] ?? '';
 
-// Fetch email from logged in user since it's hidden from form
+// Fetch name and email from logged in user automatically
+$name = '';
 $email = '';
-$stmt_email = $conn->prepare("SELECT email FROM users WHERE u_id = ?");
-$stmt_email->bind_param("i", $user_id);
-$stmt_email->execute();
-$stmt_email->bind_result($email);
-$stmt_email->fetch();
-$stmt_email->close();
+$stmt_user = $conn->prepare("SELECT name, email FROM users WHERE u_id = ?");
+$stmt_user->bind_param("i", $user_id);
+$stmt_user->execute();
+$stmt_user->bind_result($name, $email);
+$stmt_user->fetch();
+$stmt_user->close();
 
 // Basic validation
 if (empty($name) || empty($email) || empty($message)) {
@@ -107,7 +79,36 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     exit;
 }
 
-// Prepare email content
+// Save to database FIRST (instant) so user gets immediate feedback
+$stmt = $conn->prepare("INSERT INTO contact_submissions (user_id, name, email, message, is_read) VALUES (?, ?, ?, ?, 0)");
+$stmt->bind_param("isss", $user_id, $name, $email, $message);
+$stmt->execute();
+
+// Return success immediately to the user
+$response = json_encode(["success" => true, "message" => "Message sent successfully"]);
+
+// Set headers to close connection immediately so browser doesn't wait for SMTP
+header('Content-Length: ' . strlen($response));
+header('Connection: close');
+echo $response;
+
+// Flush all output buffers to send response to browser NOW
+ob_end_flush();
+@ob_flush();
+flush();
+
+// Detach from request if possible
+if (function_exists('fastcgi_finish_request')) {
+    fastcgi_finish_request();
+}
+if (function_exists('litespeed_finish_request')) {
+    litespeed_finish_request();
+}
+
+// Close session so it doesn't block other requests
+session_write_close();
+
+// Now attempt to send the email in the background (after response is sent)
 $subject = "New Contact Form Submission from " . $name;
 $emailBody = "
     <h2>Contact Form Submission</h2>
@@ -117,15 +118,6 @@ $emailBody = "
     <p>" . nl2br(htmlspecialchars($message)) . "</p>
 ";
 
-// Send the mail to the receiver defined in config
-$result = sendMail(RECEIVER_EMAIL, $subject, $emailBody, $email);
-
-if ($result['success']) {
-    // Log the submission with actual data
-    $stmt = $conn->prepare("INSERT INTO contact_submissions (user_id, name, email, message, is_read) VALUES (?, ?, ?, ?, 0)");
-    $stmt->bind_param("isss", $user_id, $name, $email, $message);
-    $stmt->execute();
-}
-
-echo json_encode($result);
+// Best-effort email send - won't block the user
+@sendMail(RECEIVER_EMAIL, $subject, $emailBody, $email);
 ?>

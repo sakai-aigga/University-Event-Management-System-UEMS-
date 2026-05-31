@@ -297,11 +297,20 @@
             if (data.success) {
                 setTimeout(() => {
                     location.reload();
-                }, 1500);
+                }, 500);
             } else {
                 btn.innerText = 'Unregister';
                 btn.disabled = false;
             }
+        })
+        .catch(err => {
+            console.error(err);
+            const msgEle = document.getElementById('regMessage');
+            msgEle.innerText = 'Connection or server error. Please try again.';
+            msgEle.className = 'message error';
+            msgEle.style.display = 'block';
+            btn.innerText = 'Unregister';
+            btn.disabled = false;
         });
     }
 
@@ -328,11 +337,20 @@
             if (data.success) {
                 setTimeout(() => {
                     location.reload(); // Reload to update all statuses
-                }, 1500);
+                }, 500);
             } else {
                 btn.innerText = 'Confirm Registration';
                 btn.disabled = false;
             }
+        })
+        .catch(err => {
+            console.error(err);
+            const msgEle = document.getElementById('regMessage');
+            msgEle.innerText = 'Connection or server error. Please try again.';
+            msgEle.className = 'message error';
+            msgEle.style.display = 'block';
+            btn.innerText = 'Confirm Registration';
+            btn.disabled = false;
         });
     };
 

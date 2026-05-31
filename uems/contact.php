@@ -137,18 +137,11 @@ if (session_status() === PHP_SESSION_NONE) {
 
             <!-- Form section -->
             <section class="contact-form-side">
-                <h3>Send us a Message</h3>
+                <h3>We'd love to hear from you</h3>
                 <form id="contactForm">
                     <div class="form-group">
-                        <label>Full Name</label>
                         <div class="input-wrapper">
-                            <input type="text" name="name" placeholder="Enter your name" required>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Message</label>
-                        <div class="input-wrapper">
-                            <textarea name="message" placeholder="How can we help you?" rows="4" required></textarea>
+                            <textarea name="message" placeholder="Your message" rows="6" required></textarea>
                         </div>
                     </div>
                     <button type="submit" class="btn-login">Send Message</button>
@@ -170,7 +163,6 @@ if (session_status() === PHP_SESSION_NONE) {
                 const data = JSON.parse(pending);
                 const form = document.getElementById('contactForm');
                 if (form) {
-                    form.elements['name'].value = data.name;
                     form.elements['message'].value = data.message;
                     
                     // Attempt to send automatically
@@ -184,7 +176,6 @@ if (session_status() === PHP_SESSION_NONE) {
             
             const formData = new FormData(this);
             const data = {
-                name: formData.get('name'),
                 message: formData.get('message')
             };
 
@@ -214,8 +205,8 @@ if (session_status() === PHP_SESSION_NONE) {
             const msgBox = document.getElementById('contactMessage');
             const submitBtn = document.querySelector('#contactForm button[type="submit"]');
             
-            msgBox.style.color = "#3b82f6";
-            msgBox.textContent = 'Sending message...';
+            msgBox.style.display = "none";
+            msgBox.textContent = '';
             if (submitBtn) {
                 submitBtn.disabled = true;
                 submitBtn.innerText = 'Sending...';
@@ -236,16 +227,19 @@ if (session_status() === PHP_SESSION_NONE) {
 
                 if (result.success) {
                     msgBox.style.color = "#10b981";
-                    msgBox.textContent = result.message || 'Thank you! Your message has been sent successfully.';
+                    msgBox.textContent = 'Sent successfully!';
+                    msgBox.style.display = 'block';
                     document.getElementById('contactForm')?.reset();
                     sessionStorage.removeItem('pendingContactMessage');
                 } else {
                     msgBox.style.color = "#ef4444";
                     msgBox.textContent = result.message || 'Error sending message.';
+                    msgBox.style.display = 'block';
                 }
             } catch (error) {
                 msgBox.style.color = "#ef4444";
                 msgBox.textContent = 'Network error. Please try again later.';
+                msgBox.style.display = 'block';
             } finally {
                 if (submitBtn) {
                     submitBtn.disabled = false;

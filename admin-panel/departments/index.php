@@ -2,6 +2,23 @@
 ob_start();
 require_once '../../includes/db-config.php';
 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+require_once '../../includes/path-config.php';
+
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+        ob_clean();
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+        exit;
+    }
+    header('Location: ' . BASE_URL . '/index.php');
+    exit;
+}
+
 // Handle AJAX Request for Department Deletion
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete_dept') {
     $dept_id = (int)$_POST['dept_id'];
@@ -170,7 +187,7 @@ $(document).ready(function() {
                 try {
                     const data = typeof response === 'string' ? JSON.parse(response) : response;
                     if (data.success) {
-                        $('#addDeptModal').modal('hide');
+                        bootstrap.Modal.getInstance(document.getElementById('addDeptModal')).hide();
                         $('#addDeptForm')[0].reset();
                         
                         // Append new row without reload
@@ -183,7 +200,7 @@ $(document).ready(function() {
                                 <td>${data.dept_name}</td>
                                 <td>
                                     <button class="btn btn-xs btn-primary edit-dept-btn" data-id="${data.dept_id}" data-acronym="${data.acronym}" data-name="${data.dept_name}"><i class="fas fa-edit"></i></button>
-                                    <button class="btn btn-xs btn-danger delete-dept-btn" data-id="${data.dept_id}"><i class="fas fa-trash"></i></button>
+                                    <button class="btn btn-xs btn-danger delete-dept-btn" data-id="${data.dept_id}" data-name="${data.dept_name}" data-bs-toggle="modal" data-bs-target="#deleteDeptModal" onclick="setDeleteDeptData(${data.dept_id}, '${String(data.dept_name).replace(/'/g, "\\'")}')"><i class="fas fa-trash"></i></button>
                                 </td>
                             </tr>
                         `;
@@ -222,7 +239,7 @@ $(document).ready(function() {
         $('#edit_dept_id').val(deptId);
         $('#edit_acronym').val(acronym);
         $('#edit_name').val(name);
-        $('#editDeptModal').modal('show');
+        new bootstrap.Modal(document.getElementById('editDeptModal')).show();
     });
 
     // Handle Edit Department Form Submission
@@ -238,7 +255,7 @@ $(document).ready(function() {
                 try {
                     const data = typeof response === 'string' ? JSON.parse(response) : response;
                     if (data.success) {
-                        $('#editDeptModal').modal('hide');
+                        bootstrap.Modal.getInstance(document.getElementById('editDeptModal')).hide();
                         $('#editDeptForm')[0].reset();
                         
                         // Update the row dynamically
