@@ -61,6 +61,7 @@ cd University-Event-Management-System-UEMS-
 
 4. **Configuration:**
 * Update the database connection settings in the `includes/` folder to match your local credentials (DB Name, Username, Password).
+* Create a Google App and put the credentials into the `includes/mail-config.php` file to ensure that the PHP mailer works well.
 
 
 5. **Deployment:**
